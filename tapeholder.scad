@@ -1,25 +1,25 @@
 height = 20;
-outer_radius = 30;
-inner_radius = 10;
+outer_radius = 35;
+inner_radius = 15;
 
 outlet_angle = 90;
 
-tape_base = 5;
-tape_thickness = 5;
+tape_base = 2.5;
+tape_thickness = 1;
 
 connector_snap_size = 1;
 connector_snap_angle = 45;
 
-closing_snap_height = 2;
+closing_snap_height = 1;
 
 thickness = 2;
 
 offset = 1;
 
-resolution = 150;
+resolution = 200;
 
 color("Brown", 1) {
-  rotate([0, 0, -(outlet_angle)]) {
+  rotate([0, 0, -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset))]) {
     inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset);
   }
 }
@@ -124,12 +124,12 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, thickness,
       }
       // closing_snap
       rotate([180, 0, 0]) {
-        rotate([0, 0, -tape_base_angle(tape_thickness, total_outer_radius)]) {
+        rotate([0, 0, -tape_base_angle(tape_thickness + thickness, outer_radius + thickness + offset)]) {
           translate([- (outer_radius + thickness / 2), 0, - (height + 2 * thickness)]) {
             union() {
-              cylinder(h = closing_snap_height + height, d = thickness);
+              cylinder(h = closing_snap_height + height, d = thickness + offset);
               translate([0, 0, closing_snap_height + height]) {
-                sphere(d = thickness);
+                sphere(d = thickness + offset);
               }
             }
           }
@@ -137,9 +137,9 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, thickness,
         rotate([0, 0, -outlet_angle]) {
           translate([- (outer_radius + thickness / 2), 0, - (height + 2 * thickness)]) {
             union() {
-              cylinder(h = closing_snap_height + height, d = thickness);
+              cylinder(h = closing_snap_height + height, d = thickness + offset);
               translate([0, 0, closing_snap_height + height]) {
-                sphere(d = thickness);
+                sphere(d = thickness + offset);
               }
             }
           }
