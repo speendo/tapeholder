@@ -7,6 +7,7 @@ outlet_angle = 60;
 tape_base = 5;
 tape_thickness = 0.1;
 
+snap_size = 1;
 snap_angle = 45;
 
 thickness = 2;
@@ -15,18 +16,18 @@ offset = 1;
 
 resolution = 150;
 
-//color("Brown", 1) {
+color("Brown", 1) {
   rotate([0, 0, -outlet_angle]) {
     inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset);
   }
-//}
-//color("Green", 1) {
+}
+color("Green", 1) {
   rotate([180, 0, 0]) {
     translate([0,0, -(height + 2* thickness + (offset / 2))]) {
       outer_part(height, outer_radius, inner_radius, tape_thickness, thickness, offset);
     }
   }
-//}
+}
 
 $fn = resolution;
 
@@ -88,7 +89,7 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, thickness,
         union() {
           cylinder(h = height + 2 * thickness + offset, r = inner_radius - thickness - offset);
           translate([0,0,height + 2 * thickness + offset]) {
-            cylinder(h = thickness, r1 = inner_radius, r2= inner_radius - 2 * thickness - offset);
+            cylinder(h = thickness, r1 = inner_radius + snap_size - thickness, r2= inner_radius - 2 * thickness - offset);
           }
         }
         // cut snaps
@@ -103,6 +104,10 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, thickness,
     // inner hole
     translate([0, 0, -1]) {
       cylinder(h = height + 3 * thickness + offset + 2, r = inner_radius - 2 * thickness - offset);
+      // cut another part of the base
+      pie(inner_radius - thickness, 180 - snap_angle, thickness + 2, snap_angle / 2);
+      pie(inner_radius - thickness, 180 - snap_angle, thickness + 2, 180 + snap_angle / 2);
+
     }
   }
 }
