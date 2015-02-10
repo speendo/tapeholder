@@ -5,32 +5,35 @@ inner_radius = 10;
 outlet_angle = 60;
 
 tape_base = 5;
+tape_thickness = 0.1;
 
 snap_angle = 45;
 
 thickness = 2;
 
-offset = 2;
+offset = 1;
 
 resolution = 150;
 
-color("Brown", 1) {
-  inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset);
-}
-color("Green", 1) {
+//color("Brown", 1) {
+  rotate([0, 0, -outlet_angle]) {
+    inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset);
+  }
+//}
+//color("Green", 1) {
   rotate([180, 0, 0]) {
     translate([0,0, -(height + 2* thickness + (offset / 2))]) {
-      outer_part(height, outer_radius, inner_radius, thickness, offset);
+      outer_part(height, outer_radius, inner_radius, tape_thickness, thickness, offset);
     }
   }
-}
+//}
 
 $fn = resolution;
 
 module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset) {
   total_outer_radius = outer_radius + thickness;
-  angle = atan(thickness / (total_outer_radius));
   tape_base = max(tape_base, (thickness + offset));
+  tape_base_angle = tape_base_angle(thickness, total_outer_radius);
 
   difference() {
     union() {
@@ -47,8 +50,11 @@ module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, t
         }
         // tape_base
         difference() {
-          pie(total_outer_radius + tape_base + offset, angle, height + thickness, -angle);
-          cylinder(h = height + thickness + 1, r = total_outer_radius - thickness);
+          // opening
+          pie(total_outer_radius + tape_base + offset, tape_base_angle, height + thickness);
+          translate([0,0,-1]) {
+            cylinder(h = height + thickness + 2, r = total_outer_radius - thickness);
+          }
         }
       }
       // inner part
@@ -61,7 +67,7 @@ module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, t
   }
 }
 
-module outer_part(height, outer_radius, inner_radius, thickness, offset) {
+module outer_part(height, outer_radius, inner_radius, tape_thickness, thickness, offset) {
   total_outer_radius = outer_radius + 2 * thickness + offset;
 
   difference() {
@@ -71,8 +77,9 @@ module outer_part(height, outer_radius, inner_radius, thickness, offset) {
         cylinder(h = height + 2 * thickness, r = total_outer_radius);
         translate([0,0,thickness]) {
           union() {
-            cylinder(h = height + thickness + 1, r = total_outer_radius - thickness);
-            pie(total_outer_radius + 1, outlet_angle, height + thickness + 1);
+            cylinder(h = height + thickness + 2, r = total_outer_radius - thickness);
+            // opening
+            pie(total_outer_radius + 1, outlet_angle + tape_thickness, height + thickness + 1);
           }
         }
       }
@@ -85,9 +92,11 @@ module outer_part(height, outer_radius, inner_radius, thickness, offset) {
           }
         }
         // cut snaps
-        union() {
-          pie(total_outer_radius, 180 - snap_angle, height + 3 * thickness + offset, snap_angle / 2);
-          pie(total_outer_radius, 180 - snap_angle, height + 3 * thickness + offset, 180 + snap_angle / 2);
+        translate([0, 0, -1]) {
+          union() {
+            pie(total_outer_radius, 180 - snap_angle, height + 3 * thickness + offset + 2, snap_angle / 2);
+            pie(total_outer_radius, 180 - snap_angle, height + 3 * thickness + offset + 2, 180 + snap_angle / 2);
+          }
         }
       }
     }
@@ -98,7 +107,10 @@ module outer_part(height, outer_radius, inner_radius, thickness, offset) {
   }
 }
 
-// Resources
+// Functions
+function tape_base_angle(thickness, total_outer_radius) = atan(thickness / (total_outer_radius));
+
+// Ressources
 /**
 * pie.scad
 *
