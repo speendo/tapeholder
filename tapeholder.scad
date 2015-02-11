@@ -7,6 +7,7 @@ outlet_angle = 90;
 tape_base = 2.5;
 tape_thickness = 1;
 
+connector_snap_number = 3;
 connector_snap_size = 1;
 connector_snap_angle = 45;
 
@@ -16,17 +17,18 @@ thickness = 2;
 
 offset = 1;
 
-resolution = 200;
+resolution = 100;
 
 color("Brown", 1) {
-  rotate([0, 0, -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset))]) {
+//  rotate([0, 0, -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset))]) {
+  rotate([0, 0, -(outlet_angle)]) {
     inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset);
   }
 }
 color("Green", 1) {
   rotate([180, 0, 0]) {
     translate([0,0, -(height + 2* thickness + (offset / 2))]) {
-      outer_part(height, outer_radius, inner_radius, tape_thickness, thickness, offset);
+      outer_part(height, outer_radius, inner_radius, tape_thickness, connector_snap_angle, connector_snap_size, connector_snap_number, thickness, offset);
     }
   }
 }
@@ -81,7 +83,7 @@ module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, t
   }
 }
 
-module outer_part(height, outer_radius, inner_radius, tape_thickness, thickness, offset) {
+module outer_part(height, outer_radius, inner_radius, tape_thickness, connector_snap_angle, connector_snap_size, connector_snap_number, thickness, offset) {
   total_outer_radius = outer_radius + 2 * thickness + offset;
 
   difference() {
@@ -108,8 +110,10 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, thickness,
         // cut connector_snaps
         translate([0, 0, -1]) {
           union() {
-            pie(total_outer_radius, 180 - connector_snap_angle, height + 3 * thickness + offset + 2, connector_snap_angle / 2);
-            pie(total_outer_radius, 180 - connector_snap_angle, height + 3 * thickness + offset + 2, 180 + connector_snap_angle / 2);
+            for (i = [1 : connector_snap_number]) {
+              echo(i * 360 / connector_snap_number);
+              pie(total_outer_radius, 360 / connector_snap_number - connector_snap_angle, height + 3 * thickness + offset + 2, i * 360 / connector_snap_number);
+            }
           }
         }
       }
@@ -117,10 +121,13 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, thickness,
     union() {
       // inner hole
       translate([0, 0, -1]) {
-        cylinder(h = height + 3 * thickness + offset + 2, r = inner_radius - 2 * thickness - offset);
-        // cut another part of the base
-        pie(inner_radius - thickness, 180 - connector_snap_angle, thickness + 2, connector_snap_angle / 2);
-        pie(inner_radius - thickness, 180 - connector_snap_angle, thickness + 2, 180 + connector_snap_angle / 2);
+        union() {
+          cylinder(h = height + 3 * thickness + offset + 2, r = inner_radius - 2 * thickness - offset);
+          // cut another part of the base
+          for (i = [1 : connector_snap_number]) {
+            pie(inner_radius - thickness, 360 / connector_snap_number - connector_snap_angle, thickness + 2, i * 360 / connector_snap_number);
+          }
+        }
       }
       // closing_snap
       rotate([180, 0, 0]) {
