@@ -17,21 +17,7 @@ thickness = 2;
 
 offset = 1;
 
-resolution = 100;
-
-color("Brown", 1) {
-//  rotate([0, 0, -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset))]) {
-  rotate([0, 0, -(outlet_angle)]) {
-    inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset);
-  }
-}
-color("Green", 1) {
-  rotate([180, 0, 0]) {
-    translate([0,0, -(height + 2* thickness + (offset / 2))]) {
-      outer_part(height, outer_radius, inner_radius, tape_thickness, connector_snap_angle, connector_snap_size, connector_snap_number, thickness, offset);
-    }
-  }
-}
+resolution = 200;
 
 $fn = resolution;
 
@@ -111,7 +97,6 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, connector_
         translate([0, 0, -1]) {
           union() {
             for (i = [1 : connector_snap_number]) {
-              echo(i * 360 / connector_snap_number);
               pie(total_outer_radius, 360 / connector_snap_number - connector_snap_angle, height + 3 * thickness + offset + 2, i * 360 / connector_snap_number);
             }
           }
@@ -201,6 +186,34 @@ module pie(radius, angle, height, spin=0) {
       else if (normalized_angle != 360) {
         intersection_for(a = rotation)
         rotate(a) translate([-radius, 0, 0]) square(radius * 2);
+      }
+    }
+  }
+}
+
+// Example
+tapeholder_show();
+
+module tapeholder_show() {
+
+  start_angle = -(outlet_angle);
+  end_angle = -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset));
+  move_range = end_angle - start_angle;
+
+  step_angle = start_angle + abs(1 - 2 * $t) * move_range;
+  echo($t);
+
+  color("Brown", 1) {
+    rotate([0, 0, step_angle]) {
+    //  rotate([0, 0, -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset))]) {
+    //rotate([0, 0, -(outlet_angle)]) {
+      inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset);
+    }
+  }
+  color("Green", 1) {
+    rotate([180, 0, 0]) {
+      translate([0,0, -(height + 2* thickness + (offset / 2))]) {
+        outer_part(height, outer_radius, inner_radius, tape_thickness, connector_snap_angle, connector_snap_size, connector_snap_number, thickness, offset);
       }
     }
   }
