@@ -17,7 +17,7 @@ thickness = 2;
 
 offset = 1;
 
-resolution = 200;
+resolution = 100;
 
 $fn = resolution;
 
@@ -82,6 +82,19 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, connector_
             cylinder(h = height + thickness + 2, r = total_outer_radius - thickness);
             // opening
             pie(total_outer_radius + 1, outlet_angle, height + thickness + 1);
+          }
+        }
+        difference() {
+          translate([0,0,-1]) {
+            cylinder(h = thickness + 1, r = total_outer_radius + 1);
+          }
+          rotate_extrude(convexity=10, $fn=resolution) {
+            translate([0,-2,0]) {
+              square([total_outer_radius - thickness, 2 * thickness + 3]);
+            }
+            translate([total_outer_radius - thickness, thickness, 0]) {
+              circle(r=thickness, fn=resolution);
+            }
           }
         }
       }
