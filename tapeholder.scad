@@ -17,7 +17,7 @@ thickness = 2;
 
 offset = 1;
 
-resolution = 100;
+resolution = 50;
 
 $fn = resolution;
 
@@ -33,6 +33,7 @@ module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, t
           // outer part
           difference() {
             cylinder(h = height + thickness, r = total_outer_radius);
+            round_outer_cut(total_outer_radius, thickness, resolution);
             translate([0,0,thickness]) {
               union() {
                 cylinder(h = height + 1, r = total_outer_radius - thickness);
@@ -58,10 +59,10 @@ module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, t
       }
     }
     // closing_snap
-    translate([- (outer_radius + thickness / 2), 0, 0]) {
+    translate([- (outer_radius + thickness / 2), 0, thickness]) { // moved up by thickness because of the rounded edge
       union() {
-        cylinder(h = closing_snap_height + height + thickness / 2, d = thickness);
-        translate([0, 0, closing_snap_height + height + thickness / 2]) {
+        cylinder(h = closing_snap_height + height - thickness / 2, d = thickness);
+        translate([0, 0, closing_snap_height + height - thickness / 2]) {
           sphere(d = thickness);
         }
       }
@@ -84,19 +85,7 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, connector_
             pie(total_outer_radius + 1, outlet_angle, height + thickness + 1);
           }
         }
-        difference() {
-          translate([0,0,-1]) {
-            cylinder(h = thickness + 1, r = total_outer_radius + 1);
-          }
-          rotate_extrude(convexity=10, $fn=resolution) {
-            translate([0,-2,0]) {
-              square([total_outer_radius - thickness, 2 * thickness + 3]);
-            }
-            translate([total_outer_radius - thickness, thickness, 0]) {
-              circle(r=thickness, fn=resolution);
-            }
-          }
-        }
+        round_outer_cuts(height + thickness + 2, total_outer_radius, thickness, resolution);
       }
       difference() {
         // inner part
@@ -127,6 +116,7 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, connector_
           }
         }
       }
+      round_inner_cuts(height + 3 * thickness + offset, inner_radius - 2 * thickness - offset, thickness, resolution);
       // closing_snap
       rotate([180, 0, 0]) {
         rotate([0, 0, -tape_base_angle(tape_thickness + thickness, outer_radius + thickness + offset)]) {
@@ -204,6 +194,62 @@ module pie(radius, angle, height, spin=0) {
   }
 }
 
+module round_outer_cuts(height, radius, thickness, resolution) {
+  round_outer_cut(radius, thickness, resolution);
+
+  translate([0, 0, height]) {
+    rotate([180,0,0]) {
+     round_outer_cut(radius, thickness, resolution);
+    }
+  }
+}
+
+module round_outer_cut(radius, thickness, resolution) {
+  difference() {
+    translate([0,0,-1]) {
+      cylinder(h = thickness + 1, r = radius + 1);
+    }
+    rotate_extrude(convexity=10, $fn=resolution) {
+      translate([0,-2,0]) {
+        square([radius - thickness, 2 * thickness + 3]);
+      }
+      translate([radius - thickness, thickness, 0]) {
+        circle(r=thickness, fn=resolution);
+      }
+    }
+  }
+}
+
+module round_inner_cuts(height, radius, thickness, resolution) {
+  round_inner_cut(radius, thickness, resolution);
+
+  translate([0, 0, height]) {
+    rotate([180,0,0]) {
+      round_inner_cut(radius, thickness, resolution);
+    }
+  }
+}
+
+module round_inner_cut(radius, thickness, resolution) {
+  difference() {
+    union() {
+      translate([0,0,-1]) {
+        cylinder(h = thickness + 1, r = radius + thickness);
+      }
+      rotate_extrude(convexity=10, $fn=resolution) {
+        translate([0,-2,0]) {
+          square([radius, 2 * thickness + 3]);
+        }
+      }
+    }
+    rotate_extrude(convexity=10, $fn=resolution) {
+      translate([radius + thickness, thickness, 0]) {
+        circle(r=thickness, fn=resolution);
+      }
+    }
+  }
+}
+
 // Example
 tapeholder_show();
 
@@ -220,7 +266,7 @@ module tapeholder_show() {
     rotate([0, 0, step_angle]) {
     //  rotate([0, 0, -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset))]) {
     //rotate([0, 0, -(outlet_angle)]) {
-      inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset);
+//      inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset);
     }
   }
   color("Green", 1) {
