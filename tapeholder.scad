@@ -44,7 +44,10 @@ module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, t
           // tape_base
           difference() {
             // opening
-            pie(total_outer_radius + tape_base + offset, tape_base_angle, height + thickness);
+            difference() {
+              pie(total_outer_radius + tape_base + offset, tape_base_angle, height + thickness);
+              round_outer_cuts(height + thickness, total_outer_radius + tape_base + offset, thickness, resolution);
+            }
             translate([0,0,-1]) {
               cylinder(h = height + thickness + 2, r = total_outer_radius - thickness);
             }
@@ -266,7 +269,7 @@ module tapeholder_show() {
     rotate([0, 0, step_angle]) {
     //  rotate([0, 0, -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset))]) {
     //rotate([0, 0, -(outlet_angle)]) {
-//      inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset);
+      inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, thickness, offset);
     }
   }
   color("Green", 1) {
