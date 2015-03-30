@@ -37,7 +37,7 @@ module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, t
             translate([0,0,thickness]) {
               union() {
                 cylinder(h = height + 1, r = total_outer_radius - thickness);
-                pie(total_outer_radius + 1, outlet_angle, height + thickness);
+                pie(total_outer_radius + 1, outlet_angle - tape_base_angle, height + thickness, tape_base_angle);
               }
             }
           }
@@ -47,6 +47,8 @@ module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, t
             difference() {
               pie(total_outer_radius + tape_base + offset, tape_base_angle, height + thickness);
               round_outer_cuts(height + thickness, total_outer_radius + tape_base + offset, thickness, resolution);
+              pillar_cut(height + thickness, total_outer_radius + tape_base + offset, thickness);
+              radius_cuts(height + thickness, total_outer_radius + tape_base + offset, thickness);
             }
             translate([0,0,-1]) {
               cylinder(h = height + thickness + 2, r = total_outer_radius - thickness);
@@ -248,6 +250,50 @@ module round_inner_cut(radius, thickness, resolution) {
     rotate_extrude(convexity=10, $fn=resolution) {
       translate([radius + thickness, thickness, 0]) {
         circle(r=thickness, fn=resolution);
+      }
+    }
+  }
+}
+
+module pillar_cut(height, radius, thickness) {
+  translate([-thickness + radius,thickness,0]) {
+    difference() {
+      translate([0,-thickness - 1,-1]) {
+        cube([thickness + 1, thickness + 1, height + 2]);
+      }
+      union() {
+        translate([0,0,thickness]) {
+          cylinder(h = height - 2 * thickness, r = thickness);
+        }
+        translate([0,0,thickness]) {
+          sphere(r = thickness);
+        }
+        translate([0,0,height - thickness]) {
+          sphere(r = thickness);
+        }
+      }
+    }
+  }
+}
+
+module radius_cuts(height, radius, thickness) {
+  radius_cut(radius, thickness);
+
+  translate([0,0,height]) {
+    rotate([-90,0,0]) {
+      radius_cut(radius, thickness);
+    }
+  }
+}
+
+module radius_cut(radius, thickness) {
+  translate([0,thickness,thickness]) {
+    rotate([0,90,0]) {
+      difference() {
+        translate([0,-thickness - 1,0]) {
+          cube([thickness + 1,thickness + 1,radius]);
+        }
+        cylinder(h = radius + 1, r = thickness);
       }
     }
   }
