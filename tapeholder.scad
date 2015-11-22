@@ -1,23 +1,23 @@
-height = 20;
-outer_radius = 35;
-inner_radius = 15;
+height = 40;
+outer_radius = 57;
+inner_radius = 25;
 
 outlet_angle = 90;
 
-tape_base = 2.5;
-tape_thickness = 1;
+tape_base = 3;
+tape_thickness = 0.25;
 
-connector_snap_number = 3;
-connector_snap_size = 1;
-connector_snap_angle = 45;
+connector_snap_number = 2;
+connector_snap_size = 2.5;
+connector_snap_angle = 160;
 
-closing_snap_height = 1;
+closing_snap_height = 1.2;
 
-thickness = 2;
+thickness = 1.2;
 
 offset = 1;
 
-resolution = 50;
+resolution = 20;
 
 $fn = resolution;
 
