@@ -4,19 +4,19 @@ inner_radius = 25;
 
 outlet_angle = 90;
 
-tape_base = 25;
+tape_base = 3;
 tape_thickness = 0.25;
 
 connector_snap_number = 2;
 connector_snap_size = 2.5;
-connector_snap_angle = 160;
+connector_snap_angle = 150;
 
 closing_snap_height = 1;
 closing_snap_offset_share = 1;
 
-thickness = 7;
+thickness = 1.2;
 
-offset = 10;
+offset = 0.5;
 
 resolution = 20;
 convexity = 3;
@@ -188,7 +188,7 @@ module pie(radius, angle, height, spin=0) {
 		if (ang == 0) {
 			cylinder(r=radius, h=height);
 		} else {
-			rotate([0, 0, spin]) {
+			rotate([0, 0, spin + negAng]) {
 				intersection() {
 					cylinder(r=radius, h=height);
 					if (absAng < 180) {
@@ -245,20 +245,20 @@ module round_inner_cuts(height, radius, thickness, resolution) {
 }
 
 module round_inner_cut(radius, thickness, resolution) {
-	difference() {
-		union() {
-			translate([0,0,-1]) {
-				cylinder(h = thickness + 1, r = radius + thickness);
-			}
-			rotate_extrude(convexity=convexity, $fn=resolution) {
-				translate([0,-2,0]) {
-					square([radius, 2 * thickness + 3]);
+	if (radius > 0) {
+		difference() {
+			union() {
+				translate([0,0,-1]) {
+					cylinder(h = thickness + 1, r = radius + thickness);
+				}
+				translate([0,0,-2]) {
+					cylinder(h = (thickness + 1) + 2, r = radius);
 				}
 			}
-		}
-		rotate_extrude(convexity=convexity, $fn=resolution) {
-			translate([radius + thickness, thickness, 0]) {
-				circle(r=thickness, fn=resolution);
+			rotate_extrude(convexity=convexity, $fn=resolution) {
+				translate([radius + thickness, thickness, 0]) {
+					circle(r=thickness, fn=resolution);
+				}
 			}
 		}
 	}
