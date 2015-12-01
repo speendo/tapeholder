@@ -18,7 +18,7 @@ thickness = 1.2;
 
 offset = 0.5;
 
-resolution = 20;
+resolution = 100;
 convexity = 3;
 
 $fn = resolution;
@@ -30,7 +30,7 @@ module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, c
 
 	union() {
 		difference() {
-			render(convexity=convexity) { // this doesn't have any effect but makes preview much faster
+//			render(convexity=convexity) { // this doesn't have any effect but makes preview much faster
 				union() {
 					union() {
 						// outer part
@@ -61,7 +61,7 @@ module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, c
 					// inner part
 					cylinder(h = height + thickness, r = inner_radius);
 				}
-			}
+//			}
 			// inner hole
 			translate([0, 0, -1]) {
 				cylinder(h = height + thickness + 2, r = inner_radius - thickness);
@@ -86,7 +86,7 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, closing_sn
 	tape_base_angle = tape_base_angle(thickness, total_outer_radius_inner);
 
 	difference() {
-		render(convexity=convexity) { // this doesn't have any effect but makes preview much faster
+//		render(convexity=convexity) { // this doesn't have any effect but makes preview much faster
 			union() {
 				// outer part
 				difference() {
@@ -118,8 +118,8 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, closing_sn
 					}
 				}
 			}
-		}
-		render(convexity=convexity) { // this doesn't have any effect but makes preview much faster
+//		}
+//		render(convexity=convexity) { // this doesn't have any effect but makes preview much faster
 			union() {
 				// inner hole
 				translate([0, 0, -1]) {
@@ -156,7 +156,7 @@ module outer_part(height, outer_radius, inner_radius, tape_thickness, closing_sn
 					}
 				}
 			}
-		}
+//		}
 	}
 }
 
@@ -332,7 +332,7 @@ module tapeholder_show() {
 	}
 	color("Green", 1) {
 		rotate([180, 0, 0]) {
-			translate([0,0, -(height + 2 * thickness + offset)]) {
+			translate([0,0, -(height + 2 * thickness)]) {
 				outer_part(height, outer_radius, inner_radius, tape_thickness, closing_snap_height, connector_snap_angle, connector_snap_size, connector_snap_number, thickness, offset);
 			}
 		}
