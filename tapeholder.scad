@@ -1,6 +1,6 @@
-height = 40;
-outer_radius = 57;
-inner_radius = 25;
+height = 42;
+outer_radius = 58;
+inner_radius = 24;
 
 outlet_angle = 90;
 
