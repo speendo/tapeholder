@@ -176,28 +176,48 @@ function tape_base_angle(thickness, total_outer_radius) = atan(thickness / (tota
 * @param float spin Angle to spin the slice on the Z axis
 */
 module pie(radius, angle, height, spin=0) {
-  // Negative angles shift direction of rotation
-  clockwise = (angle < 0) ? true : false;
-  // Support angles < 0 and > 360
-  normalized_angle = abs((angle % 360 != 0) ? angle % 360 : angle % 360 + 360);
-  // Select rotation direction
-  rotation = clockwise ? [0, 180 - normalized_angle] : [180, normalized_angle];
-  // Render
-  if (angle != 0) {
-    rotate([0,0,spin]) linear_extrude(height=height)
-    difference() {
-      circle(radius);
-      if (normalized_angle < 180) {
-        union() for(a = rotation)
-        rotate(a) translate([-radius, 0, 0]) square(radius * 2);
-      }
-      else if (normalized_angle != 360) {
-        intersection_for(a = rotation)
-        rotate(a) translate([-radius, 0, 0]) square(radius * 2);
-      }
-    }
-  }
+	// submodules
+	module pieCube() {
+		translate([-radius - 1, 0, -1]) {
+			cube([2*(radius + 1), radius, height + 2]);
+		}
+	}
+
+	ang = abs(angle % 360);
+	
+	negAng = angle < 0 ? angle : 0;
+	
+	rotate([0,0,negAng + spin]) {
+		if (angle == 0) {
+			cylinder(r=radius, h=height);
+		} else if (abs(angle) > 0 && ang <= 180) {
+			difference() {
+				intersection() {
+					cylinder(r=radius, h=height);
+					translate([0,0,0]) {
+						pieCube();
+					}
+				}
+				rotate([0, 0, ang]) {
+					pieCube();
+				}
+			}
+		} else if (ang > 180) {
+			intersection() {
+				cylinder(r=radius, h=height);
+				union() {
+					translate([0, 0, 0]) {
+						pieCube();
+					}
+					rotate([0, 0, ang - 180]) {
+						pieCube();
+					}
+				}
+			}
+		}
+	}
 }
+
 
 module round_outer_cuts(height, radius, thickness, resolution) {
   round_outer_cut(radius, thickness, resolution);
