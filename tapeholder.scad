@@ -21,7 +21,7 @@ offset = 0.5;
 resolution = 100;
 convexity = 3;
 
-$fn = resolution;
+// $fn = resolution;
 
 module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, closing_snap_height, closing_snap_offset_share, thickness, offset) {
 	total_outer_radius = outer_radius + thickness;

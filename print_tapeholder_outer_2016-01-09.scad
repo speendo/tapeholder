@@ -20,7 +20,7 @@ thickness = 1.2;
 
 offset = 0.5;
 
-resolution = 20;
+resolution = 100;
 
 $fn = resolution;
 
