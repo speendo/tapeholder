@@ -1,27 +1,62 @@
+/* [Basic Properties] */
+
+// Part to be computed
+part = "Both Parts"; // [Inner Part, Outer Part, Both Parts]
+
+// Preview mode (no round corners - computes faster)
+debug = true;
+
+// Resolution (start low, raise before compilation)
+resolution = 50;
+
+/* [Basic Features] */
+
+// Height (in mm)
 height = 42;
+// Outer Radius (in mm)
 outer_radius = 58;
+// Inner Radius (in mm)
 inner_radius = 24;
 
-outlet_angle = 90;
-
-tape_base = 3;
-tape_thickness = 0.25;
-
-connector_snap_number = 2;
-connector_snap_size = 2.5;
-connector_snap_angle = 150;
-
-closing_snap_height = 1;
-closing_snap_offset_share = 1;
-
+// Wall Thickness (in mm)
 thickness = 1.2;
 
+// Offset between Inner and Outer Part (in mm)
 offset = 0.5;
 
-resolution = 50;
+/* [Opening Features] */
+
+// Opening Angle (in Deg)
+outlet_angle = 90; //[0:0.5:360]
+
+// Length of the Opening Notch e.g. to stick the ape on (in mm)
+tape_base = 3;
+// Tape Thickness - determines the position of the open/close openings in the outer part (in mm)
+tape_thickness = 0.25;
+
+/* [Snap Features] */
+
+// Number of Snaps
+connector_snap_number = 2;
+
+// Clip Size (in mm)
+connector_snap_size = 2.5;
+
+// Snap Angle (in Deg)
+connector_snap_angle = 150;
+
+// Snap Height (in mm)
+closing_snap_height = 1;
+
+// Share of the Offset Value to be used for the Snaps (smaller values shifts Snaps down)
+closing_snap_offset_share = 1; // [0:0.01:1]
+
+/* [Advanced Features] */
+
+// Convexity used in rotate_extrude() - only change if you know what you are doing
 convexity = 3;
 
-debug=false;
+/* [Hidden] */
 
 // $fn = resolution;
 
@@ -341,8 +376,68 @@ module radius_cut(radius, thickness) {
 	}
 }
 
+// Factory
+if (part == "Inner Part") {
+	inner_part(
+		height,
+		outer_radius,
+		inner_radius,
+		outlet_angle,
+		tape_base,
+		closing_snap_height,
+		closing_snap_offset_share,
+		thickness,
+		offset,
+		debug = debug
+	);
+} else if (part == "Outer Part") {
+	outer_part(
+		height,
+		outer_radius,
+		inner_radius,
+		tape_thickness,
+		closing_snap_height,
+		connector_snap_angle,
+		connector_snap_size,
+		connector_snap_number,
+		thickness,
+		offset,
+		debug = debug
+	);
+} else if (part == "Both Parts") {
+	translate([(-1) * (outer_radius + 2 * thickness + offset + ((tape_base + thickness)/2)), 0, 0]) {
+		inner_part(
+			height,
+			outer_radius,
+			inner_radius,
+			outlet_angle,
+			tape_base,
+			closing_snap_height,
+			closing_snap_offset_share,
+			thickness,
+			offset,
+			debug = debug
+		);
+	}
+	translate([(outer_radius + 2 * thickness + offset + ((tape_base + thickness)/2)), 0, 0]) {
+		outer_part(
+			height,
+			outer_radius,
+			inner_radius,
+			tape_thickness,
+			closing_snap_height,
+			connector_snap_angle,
+			connector_snap_size,
+			connector_snap_number,
+			thickness,
+			offset,
+			debug = debug
+		);
+	}
+}
+
 // Example
-tapeholder_show();
+// tapeholder_show();
 
 module tapeholder_show() {
 
