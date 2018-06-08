@@ -232,6 +232,28 @@ module outer_part(
 function tape_base_angle(thickness, total_outer_radius) = atan(thickness / (total_outer_radius));
 
 // Ressources
+/**
+* pie.scad
+*
+* Use this module to generate a pie- or pizza- slice shape, which is particularly useful
+* in combination with `difference()` and `intersection()` to render shapes that extend a
+* certain number of degrees around or within a circle.
+*
+* This openSCAD library is part of the [dotscad](https://github.com/dotscad/dotscad)
+* project.
+*
+* @copyright Chris Petersen, 2013
+* @license http://creativecommons.org/licenses/LGPL/2.1/
+* @license http://creativecommons.org/licenses/by-sa/3.0/
+*
+* @see http://www.thingiverse.com/thing:109467
+* @source https://github.com/dotscad/dotscad/blob/master/pie.scad
+*
+* @param float radius Radius of the pie
+* @param float angle Angle (size) of the pie to slice
+* @param float height Height (thickness) of the pie
+* @param float spin Angle to spin the slice on the Z axis
+*/
 module pie(radius, angle, height, spin=0) {
 	// calculations
 	ang = angle % 360;
