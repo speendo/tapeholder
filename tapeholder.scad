@@ -29,12 +29,10 @@ offset = 0.5;
 // Opening Angle (in Deg)
 outlet_angle = 90; //[0:0.5:360]
 
-// Length of the Opening Notch e.g. to stick the ape on (in mm)
+// Length of the Opening Notch e.g. to stick the tape on (in mm)
 tape_base = 3;
-// Tape Thickness - determines the position of the open/close openings in the outer part (in mm)
-tape_thickness = 0.25;
 
-/* [Snap Features] */
+/* [Connection Features] */
 
 // Number of Snaps
 connector_snap_number = 2;
@@ -45,11 +43,32 @@ connector_snap_size = 2.5;
 // Snap Angle (in Deg)
 connector_snap_angle = 150;
 
-// Snap Height (in mm)
+/* [Opening and Closing Snaps] */
+// Snap Height on the inner part (in mm)
 closing_snap_height = 1;
 
 // Share of the Offset Value to be used for the Snaps (smaller values shifts Snaps down)
 closing_snap_offset_share = 1; // [0:0.01:1]
+
+// Tape Thickness - determines the position of the open/close openings in the outer part (in mm)
+tape_thickness = 0.25;
+
+/* [Inscription] */
+
+// Do you want an inscription?
+add_inscription = false;
+
+// Content
+text_content = "";
+
+// Text Size
+text_size = 10;
+
+// Font (depends on which fonts are installed)
+text_font = "Liberation Mono";
+
+// Inscription Depth (as share of thickness)
+inscription_depth = 0.4; // [0:0.01:1]
 
 /* [Advanced Features] */
 
@@ -135,6 +154,7 @@ module outer_part(
 		height,
 		outer_radius,
 		inner_radius,
+		outlet_angle,
 		tape_thickness,
 		closing_snap_height,
 		connector_snap_angle,
@@ -143,8 +163,8 @@ module outer_part(
 		thickness,
 		offset,
 		debug=false
-	) {
-	total_outer_radius = outer_radius + 2 * thickness + offset;
+) {
+	total_outer_radius = total_outer_radius_outer_part(outer_radius, thickness, offset);
 	
 	total_outer_radius_inner = outer_radius + thickness;
 	tape_base_angle = tape_base_angle(thickness, total_outer_radius_inner);
@@ -228,8 +248,102 @@ module outer_part(
 	}
 }
 
+// Helper module from https://github.com/brodykenrick/text_on_OpenSCAD
+use <text_on_OpenSCAD/text_on.scad>;
+
+module outer_part_with_text (
+		height,
+		outer_radius,
+		inner_radius,
+		outlet_angle,
+		tape_thickness,
+		closing_snap_height,
+		connector_snap_angle,
+		connector_snap_size,
+		connector_snap_number,
+		thickness,
+		offset,
+		debug=false,
+		text_content,
+		text_size
+) {
+	difference() {
+		outer_part(
+				height,
+				outer_radius,
+				inner_radius,
+				outlet_angle,
+				tape_thickness,
+				closing_snap_height,
+				connector_snap_angle,
+				connector_snap_size,
+				connector_snap_number,
+				thickness,
+				offset,
+				debug
+		);
+		rotate([0, 0, 270+(outlet_angle/2)]) {
+	text_on_cylinder(t=text_content,r=total_outer_radius_outer_part(outer_radius, thickness, offset),h=height + 2 * thickness, font="Liberation Mono", direction="ltr", size=text_size, extrusion_height=2*thickness*inscription_depth);
+		}
+	}
+}
+
+module outer_part_with_text_gate(
+		height,
+		outer_radius,
+		inner_radius,
+		outlet_angle,
+		tape_thickness,
+		closing_snap_height,
+		connector_snap_angle,
+		connector_snap_size,
+		connector_snap_number,
+		thickness,
+		offset,
+		debug=false,
+		text_content,
+		text_size,
+		add_inscription=false
+) {
+	if (add_inscription) {
+		outer_part_with_text(
+				height,
+				outer_radius,
+				inner_radius,
+				outlet_angle,
+				tape_thickness,
+				closing_snap_height,
+				connector_snap_angle,
+				connector_snap_size,
+				connector_snap_number,
+				thickness,
+				offset,
+				debug,
+				text_content,
+				text_size
+		);
+	} else {
+		outer_part(
+				height,
+				outer_radius,
+				inner_radius,
+				outlet_angle,
+				tape_thickness,
+				closing_snap_height,
+				connector_snap_angle,
+				connector_snap_size,
+				connector_snap_number,
+				thickness,
+				offset,
+				debug
+		);
+	}
+}
+
 // Functions
 function tape_base_angle(thickness, total_outer_radius) = atan(thickness / (total_outer_radius));
+
+function total_outer_radius_outer_part(outer_radius, thickness, offset) = outer_radius + 2 * thickness + offset;
 
 // Ressources
 module pie(radius, angle, height, spin=0) {
@@ -388,24 +502,28 @@ if (part == "Inner Part") {
 		closing_snap_offset_share,
 		thickness,
 		offset,
-		debug = debug
+		debug
 	);
 } else if (part == "Outer Part") {
-	outer_part(
-		height,
-		outer_radius,
-		inner_radius,
-		tape_thickness,
-		closing_snap_height,
-		connector_snap_angle,
-		connector_snap_size,
-		connector_snap_number,
-		thickness,
-		offset,
-		debug = debug
+	outer_part_with_text_gate(
+			height,
+			outer_radius,
+			inner_radius,
+			outlet_angle,
+			tape_thickness,
+			closing_snap_height,
+			connector_snap_angle,
+			connector_snap_size,
+			connector_snap_number,
+			thickness,
+			offset,
+			debug,
+			text_content,
+			text_size,
+			add_inscription
 	);
 } else if (part == "Both Parts") {
-	translate([(-1) * (outer_radius + 2 * thickness + offset + ((tape_base + thickness)/2)), 0, 0]) {
+	translate([(-1) * (total_outer_radius_outer_part(outer_radius, thickness, offset) + ((tape_base + thickness)/2)), 0, 0]) {
 		inner_part(
 			height,
 			outer_radius,
@@ -416,22 +534,26 @@ if (part == "Inner Part") {
 			closing_snap_offset_share,
 			thickness,
 			offset,
-			debug = debug
+			debug
 		);
 	}
-	translate([(outer_radius + 2 * thickness + offset + ((tape_base + thickness)/2)), 0, 0]) {
-		outer_part(
-			height,
-			outer_radius,
-			inner_radius,
-			tape_thickness,
-			closing_snap_height,
-			connector_snap_angle,
-			connector_snap_size,
-			connector_snap_number,
-			thickness,
-			offset,
-			debug = debug
+	translate([(total_outer_radius_outer_part(outer_radius, thickness, offset) + ((tape_base + thickness)/2)), 0, 0]) {
+		outer_part_with_text_gate(
+				height,
+				outer_radius,
+				inner_radius,
+				outlet_angle,
+				tape_thickness,
+				closing_snap_height,
+				connector_snap_angle,
+				connector_snap_size,
+				connector_snap_number,
+				thickness,
+				offset,
+				debug,
+				text_content,
+				text_size,
+				add_inscription
 		);
 	}
 }

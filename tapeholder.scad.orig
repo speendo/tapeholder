@@ -1,0 +1,521 @@
+<<<<<<< HEAD
+/* [Basic Properties] */
+=======
+height = 42;
+outer_radius = 58;
+inner_radius = 24;
+>>>>>>> 4ebf592dbe9fa5f6f1f41c83e39532634906b65d
+
+// Part to be computed
+part = "Both Parts"; // [Inner Part, Outer Part, Both Parts]
+
+<<<<<<< HEAD
+// Preview mode (no round corners - computes faster)
+debug = true;
+
+// Resolution (start low, raise before compilation)
+resolution = 50;
+
+/* [Basic Features] */
+
+// Height (in mm)
+height = 42;
+// Outer Radius (in mm)
+outer_radius = 58;
+// Inner Radius (in mm)
+inner_radius = 24;
+
+// Wall Thickness (in mm)
+thickness = 1.2;
+
+// Offset between Inner and Outer Part (in mm)
+offset = 0.5;
+
+/* [Opening Features] */
+
+// Opening Angle (in Deg)
+outlet_angle = 90; //[0:0.5:360]
+
+// Length of the Opening Notch e.g. to stick the ape on (in mm)
+tape_base = 3;
+// Tape Thickness - determines the position of the open/close openings in the outer part (in mm)
+tape_thickness = 0.25;
+
+/* [Snap Features] */
+
+// Number of Snaps
+connector_snap_number = 2;
+
+// Clip Size (in mm)
+connector_snap_size = 2.5;
+
+// Snap Angle (in Deg)
+=======
+tape_base = 3;
+tape_thickness = 0.25;
+
+connector_snap_number = 2;
+connector_snap_size = 2.5;
+>>>>>>> 4ebf592dbe9fa5f6f1f41c83e39532634906b65d
+connector_snap_angle = 150;
+
+// Snap Height (in mm)
+closing_snap_height = 1;
+closing_snap_offset_share = 1;
+
+<<<<<<< HEAD
+// Share of the Offset Value to be used for the Snaps (smaller values shifts Snaps down)
+closing_snap_offset_share = 1; // [0:0.01:1]
+
+/* [Advanced Features] */
+
+// Convexity used in rotate_extrude() - only change if you know what you are doing
+convexity = 3;
+
+/* [Hidden] */
+
+// $fn = resolution;
+
+module inner_part(
+		height,
+		outer_radius,
+		inner_radius,
+		outlet_angle,
+		tape_base,
+		closing_snap_height,
+		closing_snap_offset_share,
+		thickness,
+		offset,
+		debug = false
+) {
+=======
+thickness = 1.2;
+
+offset = 0.5;
+
+resolution = 100;
+convexity = 3;
+
+// $fn = resolution;
+
+module inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, closing_snap_height, closing_snap_offset_share, thickness, offset) {
+>>>>>>> 4ebf592dbe9fa5f6f1f41c83e39532634906b65d
+	total_outer_radius = outer_radius + thickness;
+	tape_base = max(tape_base, (thickness + offset));
+	tape_base_angle = tape_base_angle(thickness, total_outer_radius);
+
+	union() {
+		difference() {
+//			render(convexity=convexity) { // this doesn't have any effect but makes preview much faster
+				union() {
+					union() {
+						// outer part
+						difference() {
+							cylinder(h = height + thickness, r = total_outer_radius);
+<<<<<<< HEAD
+							if (!debug) {
+								round_outer_cut(total_outer_radius, thickness, resolution);
+							}
+=======
+							round_outer_cut(total_outer_radius, thickness, resolution);
+>>>>>>> 4ebf592dbe9fa5f6f1f41c83e39532634906b65d
+							translate([0,0,thickness]) {
+								union() {
+									cylinder(h = height + 1, r = total_outer_radius - thickness);
+									pie(total_outer_radius + 1, outlet_angle, height + thickness, tape_base_angle);
+								}
+							}
+						}
+						// tape_base
+						difference() {
+							// opening
+							difference() {
+								pie(total_outer_radius + tape_base, tape_base_angle, height + thickness);
+<<<<<<< HEAD
+								if (!debug) {
+									round_outer_cuts(height + thickness, total_outer_radius + tape_base, thickness, resolution);
+									pillar_cut(height + thickness, total_outer_radius + tape_base, thickness);
+									radius_cuts(height + thickness, total_outer_radius + tape_base, thickness);
+								}
+=======
+								round_outer_cuts(height + thickness, total_outer_radius + tape_base, thickness, resolution);
+								pillar_cut(height + thickness, total_outer_radius + tape_base, thickness);
+								radius_cuts(height + thickness, total_outer_radius + tape_base, thickness);
+>>>>>>> 4ebf592dbe9fa5f6f1f41c83e39532634906b65d
+							}
+							translate([0,0,-1]) {
+								cylinder(h = height + thickness + 2, r = total_outer_radius - thickness);
+							}
+						}
+					}
+					// inner part
+					cylinder(h = height + thickness, r = inner_radius);
+				}
+//			}
+			// inner hole
+			translate([0, 0, -1]) {
+				cylinder(h = height + thickness + 2, r = inner_radius - thickness);
+			}
+		}
+		// closing_snap
+		translate([- (outer_radius + thickness / 2), 0, thickness]) { // moved up by thickness because of the rounded edge
+			union() {
+				cylinder(h = closing_snap_height + height + (offset * closing_snap_offset_share) - thickness / 2, d = thickness); // is offset right here?
+				translate([0, 0, closing_snap_height + height + (offset * closing_snap_offset_share) - thickness / 2]) { // is offset right here?
+					sphere(d = thickness);
+				}
+			}
+		}
+	}
+}
+
+<<<<<<< HEAD
+module outer_part(
+		height,
+		outer_radius,
+		inner_radius,
+		tape_thickness,
+		closing_snap_height,
+		connector_snap_angle,
+		connector_snap_size,
+		connector_snap_number,
+		thickness,
+		offset,
+		debug=false
+	) {
+=======
+module outer_part(height, outer_radius, inner_radius, tape_thickness, closing_snap_height, connector_snap_angle, connector_snap_size, connector_snap_number, thickness, offset) {
+>>>>>>> 4ebf592dbe9fa5f6f1f41c83e39532634906b65d
+	total_outer_radius = outer_radius + 2 * thickness + offset;
+	
+	total_outer_radius_inner = outer_radius + thickness;
+	tape_base_angle = tape_base_angle(thickness, total_outer_radius_inner);
+
+	difference() {
+//		render(convexity=convexity) { // this doesn't have any effect but makes preview much faster
+			union() {
+				// outer part
+				difference() {
+					cylinder(h = height + 2 * thickness, r = total_outer_radius);
+					translate([0,0,thickness]) {
+						union() {
+							cylinder(h = height + thickness + 1, r = total_outer_radius - thickness);
+							// opening
+							pie(total_outer_radius + 1, outlet_angle + tape_base_angle, height + thickness + 1);
+						}
+					}
+<<<<<<< HEAD
+					if (!debug) {
+						round_outer_cuts(height + 2 * thickness, total_outer_radius, thickness, resolution);
+					}
+=======
+					round_outer_cuts(height + 2 * thickness, total_outer_radius, thickness, resolution);
+>>>>>>> 4ebf592dbe9fa5f6f1f41c83e39532634906b65d
+				}
+				difference() {
+					// inner part
+					union() {
+						cylinder(h = height + 2 * thickness + offset, r = inner_radius - thickness - offset);
+						translate([0,0,height + 2 * thickness + offset]) {
+							cylinder(h = thickness, r1 = inner_radius + connector_snap_size - thickness, r2= inner_radius - 2 * thickness - offset);
+						}
+					}
+					// cut connector_snaps
+					translate([0, 0, -1]) {
+						union() {
+							for (i = [1 : connector_snap_number]) {
+								pie(total_outer_radius, 360 / connector_snap_number - connector_snap_angle, height + 3 * thickness + offset + 2, i * 360 / connector_snap_number);
+							}
+						}
+					}
+				}
+			}
+//		}
+//		render(convexity=convexity) { // this doesn't have any effect but makes preview much faster
+			union() {
+				// inner hole
+				translate([0, 0, -1]) {
+					union() {
+						cylinder(h = height + 3 * thickness + offset + 2, r = inner_radius - 2 * thickness - offset);
+						// cut another part of the base
+						for (i = [1 : connector_snap_number]) {
+							pie(inner_radius - thickness, 360 / connector_snap_number - connector_snap_angle, thickness + 2, i * 360 / connector_snap_number);
+						}
+					}
+				}
+<<<<<<< HEAD
+				if (!debug) {
+					round_inner_cuts(height + 3 * thickness + offset, inner_radius - 2 * thickness - offset, thickness, resolution);
+				}
+=======
+				round_inner_cuts(height + 3 * thickness + offset, inner_radius - 2 * thickness - offset, thickness, resolution);
+>>>>>>> 4ebf592dbe9fa5f6f1f41c83e39532634906b65d
+				// closing_snap
+				rotate([180, 0, 0]) {
+					rotate([0, 0, -tape_base_angle(tape_thickness + thickness, outer_radius + thickness + offset)]) {
+						translate([- (outer_radius + thickness / 2), 0, - (height + 2 * thickness)]) {
+							union() {
+								cylinder(h = closing_snap_height + height + thickness - (thickness + offset) / 2, d = thickness + offset);
+								translate([0, 0, closing_snap_height + height + thickness - (thickness + offset) / 2]) {
+									sphere(d = thickness + offset);
+								}
+							}
+						}
+					}
+					rotate([0, 0, -outlet_angle]) {
+						translate([- (outer_radius + thickness / 2), 0, - (height + 2 * thickness)]) {
+							union() {
+								cylinder(h = closing_snap_height + height + thickness - (thickness + offset) / 2, d = thickness + offset);
+								translate([0, 0, closing_snap_height + height + thickness - (thickness + offset) / 2]) {
+									sphere(d = thickness + offset);
+								}
+							}
+						}
+					}
+				}
+			}
+//		}
+	}
+}
+
+// Functions
+function tape_base_angle(thickness, total_outer_radius) = atan(thickness / (total_outer_radius));
+
+// Ressources
+module pie(radius, angle, height, spin=0) {
+	// calculations
+	ang = angle % 360;
+	absAng = abs(ang);
+	halfAng = absAng % 180;
+	negAng = min(ang, 0);
+
+	// submodules
+	module pieCube() {
+		translate([-radius - 1, 0, -1]) {
+			cube([2*(radius + 1), radius + 1, height + 2]);
+		}
+	}
+
+	module rotPieCube() {
+		rotate([0, 0, halfAng]) {
+			pieCube();
+		}
+	}
+
+	if (angle != 0) {
+		if (ang == 0) {
+			cylinder(r=radius, h=height);
+		} else {
+			rotate([0, 0, spin + negAng]) {
+				intersection() {
+					cylinder(r=radius, h=height);
+					if (absAng < 180) {
+						difference() {
+							pieCube();
+							rotPieCube();
+						}
+					} else {
+						union() {
+							pieCube();
+							rotPieCube();
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+module round_outer_cuts(height, radius, thickness, resolution) {
+	round_outer_cut(radius, thickness, resolution);
+
+	translate([0, 0, height]) {
+		rotate([180,0,0]) {
+		 round_outer_cut(radius, thickness, resolution);
+		}
+	}
+}
+
+module round_outer_cut(radius, thickness, resolution) {
+	difference() {
+		translate([0,0,-1]) {
+			cylinder(h = thickness + 1, r = radius + 1);
+		}
+		rotate_extrude(convexity=convexity, $fn=resolution) {
+			translate([0,-2,0]) {
+				square([radius - thickness, 2 * thickness + 3]);
+			}
+			translate([radius - thickness, thickness, 0]) {
+				circle(r=thickness, fn=resolution);
+			}
+		}
+	}
+}
+
+module round_inner_cuts(height, radius, thickness, resolution) {
+	round_inner_cut(radius, thickness, resolution);
+
+	translate([0, 0, height]) {
+		rotate([180,0,0]) {
+			round_inner_cut(radius, thickness, resolution);
+		}
+	}
+}
+
+module round_inner_cut(radius, thickness, resolution) {
+	if (radius > 0) {
+		difference() {
+			union() {
+				translate([0,0,-1]) {
+					cylinder(h = thickness + 1, r = radius + thickness);
+				}
+				translate([0,0,-2]) {
+					cylinder(h = (thickness + 1) + 2, r = radius);
+				}
+			}
+			rotate_extrude(convexity=convexity, $fn=resolution) {
+				translate([radius + thickness, thickness, 0]) {
+					circle(r=thickness, fn=resolution);
+				}
+			}
+		}
+	}
+}
+
+module pillar_cut(height, radius, thickness) {
+	translate([-thickness + radius,thickness,0]) {
+		difference() {
+			translate([0,-thickness - 1,-1]) {
+				cube([thickness + 1, thickness + 1, height + 2]);
+			}
+			union() {
+				translate([0,0,thickness]) {
+					cylinder(h = height - 2 * thickness, r = thickness);
+				}
+				translate([0,0,thickness]) {
+					sphere(r = thickness);
+				}
+				translate([0,0,height - thickness]) {
+					sphere(r = thickness);
+				}
+			}
+		}
+	}
+}
+
+module radius_cuts(height, radius, thickness) {
+	radius_cut(radius, thickness);
+
+	translate([0,0,height]) {
+		rotate([-90,0,0]) {
+			radius_cut(radius, thickness);
+		}
+	}
+}
+
+module radius_cut(radius, thickness) {
+	translate([0,thickness,thickness]) {
+		rotate([0,90,0]) {
+			difference() {
+				translate([0,-thickness - 1,0]) {
+					cube([thickness + 1,thickness + 1,radius]);
+				}
+				cylinder(h = radius + 1, r = thickness);
+			}
+		}
+	}
+<<<<<<< HEAD
+}
+
+// Factory
+if (part == "Inner Part") {
+	inner_part(
+		height,
+		outer_radius,
+		inner_radius,
+		outlet_angle,
+		tape_base,
+		closing_snap_height,
+		closing_snap_offset_share,
+		thickness,
+		offset,
+		debug = debug
+	);
+} else if (part == "Outer Part") {
+	outer_part(
+		height,
+		outer_radius,
+		inner_radius,
+		tape_thickness,
+		closing_snap_height,
+		connector_snap_angle,
+		connector_snap_size,
+		connector_snap_number,
+		thickness,
+		offset,
+		debug = debug
+	);
+} else if (part == "Both Parts") {
+	translate([(-1) * (outer_radius + 2 * thickness + offset + ((tape_base + thickness)/2)), 0, 0]) {
+		inner_part(
+			height,
+			outer_radius,
+			inner_radius,
+			outlet_angle,
+			tape_base,
+			closing_snap_height,
+			closing_snap_offset_share,
+			thickness,
+			offset,
+			debug = debug
+		);
+	}
+	translate([(outer_radius + 2 * thickness + offset + ((tape_base + thickness)/2)), 0, 0]) {
+		outer_part(
+			height,
+			outer_radius,
+			inner_radius,
+			tape_thickness,
+			closing_snap_height,
+			connector_snap_angle,
+			connector_snap_size,
+			connector_snap_number,
+			thickness,
+			offset,
+			debug = debug
+		);
+	}
+=======
+>>>>>>> 4ebf592dbe9fa5f6f1f41c83e39532634906b65d
+}
+
+// Example
+// tapeholder_show();
+
+module tapeholder_show() {
+
+	start_angle = -(outlet_angle);
+	end_angle = -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset));
+	move_range = end_angle - start_angle;
+
+	step_angle = start_angle + abs(1 - 2 * $t) * move_range;
+	echo($t);
+	
+	total_outer_radius_inner = outer_radius + thickness;
+	tape_base_angle = tape_base_angle(thickness, total_outer_radius_inner);
+
+	color("Brown", 1) {
+		//rotate([0, 0, step_angle]) {
+		//rotate([0, 0, -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset))]) {
+		rotate([0, 0, -(outlet_angle + tape_base_angle)]) {
+			inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, closing_snap_height, closing_snap_offset_share, thickness, offset);
+		}
+	}
+	color("Green", 1) {
+		rotate([180, 0, 0]) {
+			translate([0,0, -(height + 2 * thickness)]) {
+				outer_part(height, outer_radius, inner_radius, tape_thickness, closing_snap_height, connector_snap_angle, connector_snap_size, connector_snap_number, thickness, offset);
+			}
+		}
+	}
+}
