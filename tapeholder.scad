@@ -98,7 +98,7 @@ convexity = 3;
 
 /* [Hidden] */
 
-// $fn = resolution;
+$fn = resolution;
 
 module inner_part(
 		height,
