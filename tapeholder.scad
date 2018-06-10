@@ -1,7 +1,7 @@
 /* [Basic Properties] */
 
 // Part to be computed
-part = "Both Parts"; // [Inner Part, Outer Part, Both Parts]
+part = "Both Parts"; // [Inner Part, Outer Part, Both Parts, Animated Preview]
 
 // Preview mode (no round corners - computes faster)
 debug = true;
@@ -635,6 +635,68 @@ if (part == "Inner Part") {
 				add_inscription
 		);
 	}
+} else if (part == "Animated Preview") {
+	start_angle = -(outlet_angle);
+	end_angle = -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset));
+	move_range = end_angle - start_angle;
+
+	step_angle = start_angle + abs(1 - 2 * $t) * move_range;
+	echo($t);
+	
+	total_outer_radius_inner = outer_radius + thickness;
+	tape_base_angle = tape_base_angle(thickness, total_outer_radius_inner);
+
+	rotate([180,0,0]) {
+		color("Brown", 1) {
+			rotate([0, 0, step_angle]) {
+//			rotate([0, 0, -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset))]) {
+//			rotate([0, 0, -(outlet_angle + tape_base_angle)]) {
+				inner_part(
+						height,
+						outer_radius,
+						inner_radius,
+						outlet_angle,
+						tape_base,
+						closing_snap_height,
+						closing_snap_offset_share,
+						thickness,
+						offset,
+						debug
+				);
+			}
+		}
+		color("Green", 1) {
+			rotate([180, 0, 0]) {
+				translate([0,0, -(height + 2 * thickness)]) {
+					outer_part_with_text_gate(
+							height,
+							outer_radius,
+							inner_radius,
+							outlet_angle,
+							tape_thickness,
+							closing_snap_height,
+							connector_snap_angle,
+							connector_snap_size,
+							connector_snap_number,
+							thickness,
+							offset,
+							debug,
+							text_lines,
+							text_content_line_1,
+							text_size_line_1,
+							text_font_line_1,
+							text_content_line_2,
+							text_size_line_2,
+							text_font_line_2,
+							text_content_line_3,
+							text_size_line_3,
+							text_font_line_3,
+							add_inscription
+					);
+				}
+			}
+		}
+	}
 }
 
 // Example
@@ -656,13 +718,48 @@ module tapeholder_show() {
 		//rotate([0, 0, step_angle]) {
 		//rotate([0, 0, -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset))]) {
 		rotate([0, 0, -(outlet_angle + tape_base_angle)]) {
-			inner_part(height, outer_radius, inner_radius, outlet_angle, tape_base, closing_snap_height, closing_snap_offset_share, thickness, offset);
+			inner_part(
+					height,
+					outer_radius,
+					inner_radius,
+					outlet_angle,
+					tape_base,
+					closing_snap_height,
+					closing_snap_offset_share,
+					thickness,
+					offset,
+					debug
+			);
 		}
 	}
 	color("Green", 1) {
 		rotate([180, 0, 0]) {
 			translate([0,0, -(height + 2 * thickness)]) {
-				outer_part(height, outer_radius, inner_radius, tape_thickness, closing_snap_height, connector_snap_angle, connector_snap_size, connector_snap_number, thickness, offset);
+				outer_part(
+						height,
+						outer_radius,
+						inner_radius,
+						outlet_angle,
+						tape_thickness,
+						closing_snap_height,
+						connector_snap_angle,
+						connector_snap_size,
+						connector_snap_number,
+						thickness,
+						offset,
+						debug,
+						text_lines,
+						text_content_line_1,
+						text_size_line_1,
+						text_font_line_1,
+						text_content_line_2,
+						text_size_line_2,
+						text_font_line_2,
+						text_content_line_3,
+						text_size_line_3,
+						text_font_line_3,
+						add_inscription
+				);
 			}
 		}
 	}
