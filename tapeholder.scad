@@ -58,14 +58,35 @@ tape_thickness = 0.25;
 // Do you want an inscription?
 add_inscription = false;
 
-// Content
-text_content = "";
+// Number of Lines
+text_lines = 1; // [1, 2, 3]
 
-// Text Size
-text_size = 10;
+// Content of Line 1
+text_content_line_1 = "";
 
-// Font (depends on which fonts are installed)
-text_font = "Liberation Mono";
+// Content of Line 2
+text_content_line_2 = "";
+
+// Content of Line 3
+text_content_line_3 = "";
+
+// Text Size Line 1
+text_size_line_1 = 10;
+
+// Text Size Line 2
+text_size_line_2 = 10;
+
+// Text Size Line 3
+text_size_line_3 = 10;
+
+// Font Line 1 (depends on which fonts are installed)
+text_font_line_1 = "Liberation Mono";
+
+// Font Line 2 (depends on which fonts are installed)
+text_font_line_2 = "Liberation Mono";
+
+// Font Line 3 (depends on which fonts are installed)
+text_font_line_3 = "Liberation Mono";
 
 // Inscription Depth (as share of thickness)
 inscription_depth = 0.4; // [0:0.01:1]
@@ -264,8 +285,16 @@ module outer_part_with_text (
 		thickness,
 		offset,
 		debug=false,
-		text_content,
-		text_size
+		text_lines,
+		text_content_line_1,
+		text_size_line_1,
+		text_font_line_1,
+		text_content_line_2,
+		text_size_line_2,
+		text_font_line_2,
+		text_content_line_3,
+		text_size_line_3,
+		text_font_line_3
 ) {
 	difference() {
 		outer_part(
@@ -283,7 +312,25 @@ module outer_part_with_text (
 				debug
 		);
 		rotate([0, 0, 270+(outlet_angle/2)]) {
-	text_on_cylinder(t=text_content,r=total_outer_radius_outer_part(outer_radius, thickness, offset),h=height + 2 * thickness, font="Liberation Mono", direction="ltr", size=text_size, extrusion_height=2*thickness*inscription_depth);
+			cylinderHeight = (height + 2 * thickness) / text_lines;
+			// Line 1
+			if (text_content_line_1 != "") {
+				translate([0,0,cylinderHeight * (text_lines - 1)]) {
+					text_on_cylinder(t=text_content_line_1,r=total_outer_radius_outer_part(outer_radius, thickness, offset), h=cylinderHeight, font=text_font_line_1, direction="ltr", size=text_size_line_1, extrusion_height=2*thickness*inscription_depth);
+				}
+			}
+			// Line 2
+			if (text_lines >= 2 && text_content_line_2 != "") {
+				translate([0,0,cylinderHeight * (text_lines - 2)]) {
+					text_on_cylinder(t=text_content_line_2,r=total_outer_radius_outer_part(outer_radius, thickness, offset), h=cylinderHeight, font=text_font_line_2, direction="ltr", size=text_size_line_2, extrusion_height=2*thickness*inscription_depth);
+				}
+			}
+			// Line 3
+			if (text_lines >= 3 && text_content_line_3 != "") {
+				translate([0,0,cylinderHeight * (text_lines - 3)]) {
+					text_on_cylinder(t=text_content_line_3,r=total_outer_radius_outer_part(outer_radius, thickness, offset), h=cylinderHeight, font=text_font_line_3, direction="ltr", size=text_size_line_3, extrusion_height=2*thickness*inscription_depth);
+				}
+			}
 		}
 	}
 }
@@ -301,8 +348,16 @@ module outer_part_with_text_gate(
 		thickness,
 		offset,
 		debug=false,
-		text_content,
-		text_size,
+		text_lines,
+		text_content_line_1,
+		text_size_line_1,
+		text_font_line_1,
+		text_content_line_2,
+		text_size_line_2,
+		text_font_line_2,
+		text_content_line_3,
+		text_size_line_3,
+		text_font_line_3,
 		add_inscription=false
 ) {
 	if (add_inscription) {
@@ -319,8 +374,16 @@ module outer_part_with_text_gate(
 				thickness,
 				offset,
 				debug,
-				text_content,
-				text_size
+				text_lines,
+				text_content_line_1,
+				text_size_line_1,
+				text_font_line_1,
+				text_content_line_2,
+				text_size_line_2,
+				text_font_line_2,
+				text_content_line_3,
+				text_size_line_3,
+				text_font_line_3
 		);
 	} else {
 		outer_part(
@@ -518,8 +581,16 @@ if (part == "Inner Part") {
 			thickness,
 			offset,
 			debug,
-			text_content,
-			text_size,
+			text_lines,
+			text_content_line_1,
+			text_size_line_1,
+			text_font_line_1,
+			text_content_line_2,
+			text_size_line_2,
+			text_font_line_2,
+			text_content_line_3,
+			text_size_line_3,
+			text_font_line_3,
 			add_inscription
 	);
 } else if (part == "Both Parts") {
@@ -551,8 +622,16 @@ if (part == "Inner Part") {
 				thickness,
 				offset,
 				debug,
-				text_content,
-				text_size,
+				text_lines,
+				text_content_line_1,
+				text_size_line_1,
+				text_font_line_1,
+				text_content_line_2,
+				text_size_line_2,
+				text_font_line_2,
+				text_content_line_3,
+				text_size_line_3,
+				text_font_line_3,
 				add_inscription
 		);
 	}
