@@ -1,7 +1,7 @@
 /* [Basic Properties] */
 
 // Part to be computed
-part = "Both Parts"; // [Inner Part, Outer Part, Both Parts, Animated Preview]
+part = 3; // [1:Inner Part, 2:Outer Part, 3:Both Parts, 4:Animated Preview]
 
 // Preview mode (no round corners - computes faster)
 debug = true;
@@ -83,7 +83,7 @@ text_size_line_2 = 10;
 text_size_line_3 = 10;
 
 // Font Line 1 (depends on which fonts are installed)
-text_font_line_1 = "Liberation Mono";
+text_font_line_1 = "Latin Modern Sans:style=Bold";
 
 // Font Line 2 (depends on which fonts are installed)
 text_font_line_2 = "Liberation Mono";
@@ -559,7 +559,7 @@ module radius_cut(radius, thickness) {
 }
 
 // Factory
-if (part == "Inner Part") {
+if (part == 1) {
 	inner_part(
 		height,
 		outer_radius,
@@ -572,7 +572,7 @@ if (part == "Inner Part") {
 		offset,
 		debug
 	);
-} else if (part == "Outer Part") {
+} else if (part == 2) {
 	outer_part_with_text_gate(
 			height,
 			outer_radius,
@@ -598,7 +598,7 @@ if (part == "Inner Part") {
 			text_font_line_3,
 			add_inscription
 	);
-} else if (part == "Both Parts") {
+} else if (part == 3) {
 	translate([(-1) * (total_outer_radius_outer_part(outer_radius, thickness, offset) + ((tape_base + thickness)/2)), 0, 0]) {
 		inner_part(
 			height,
@@ -640,7 +640,7 @@ if (part == "Inner Part") {
 				add_inscription
 		);
 	}
-} else if (part == "Animated Preview") {
+} else if (part == 4) {
 	start_angle = -(outlet_angle);
 	end_angle = -(tape_base_angle(thickness + tape_thickness, outer_radius + thickness + offset));
 	move_range = end_angle - start_angle;
