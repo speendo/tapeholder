@@ -14,15 +14,18 @@ resolution = 50;
 // Height (in mm)
 height = 42;
 // Outer Radius (in mm)
-outer_radius = 58;
+outer_radius = 29;
 // Inner Radius (in mm)
-inner_radius = 24;
+inner_radius = 12;
 
+/* [Thickness and Offset] */
 // Wall Thickness (in mm)
 thickness = 1.2;
 
 // Offset between Inner and Outer Part (in mm)
-offset = 0.5;
+offset = 0.2;
+
+// Z-Offset should be higher
 
 /* [Opening Features] */
 
@@ -41,7 +44,7 @@ connector_snap_number = 2;
 connector_snap_size = 2.5;
 
 // Snap Angle (in Deg)
-connector_snap_angle = 150;
+connector_snap_angle = 140;
 
 /* [Opening and Closing Snaps] */
 // Snap Height on the inner part (in mm)
@@ -311,24 +314,26 @@ module outer_part_with_text (
 				offset,
 				debug
 		);
-		rotate([0, 0, 270+(outlet_angle/2)]) {
-			cylinderHeight = (height + 2 * thickness) / text_lines;
-			// Line 1
-			if (text_content_line_1 != "") {
-				translate([0,0,cylinderHeight * (text_lines - 1)]) {
-					text_on_cylinder(t=text_content_line_1,r=total_outer_radius_outer_part(outer_radius, thickness, offset), h=cylinderHeight, font=text_font_line_1, direction="ltr", size=text_size_line_1, extrusion_height=2*thickness*inscription_depth);
+		translate([0,0,thickness]) {
+			rotate([0, 0, 270+(outlet_angle/2)]) {
+				cylinderHeight = (height) / text_lines;
+				// Line 1
+				if (text_content_line_1 != "") {
+					translate([0,0,cylinderHeight * (text_lines - 1)]) {
+						text_on_cylinder(t=text_content_line_1,r=total_outer_radius_outer_part(outer_radius, thickness, offset), h=cylinderHeight, font=text_font_line_1, direction="ltr", size=text_size_line_1, extrusion_height=2*thickness*inscription_depth);
+					}
 				}
-			}
-			// Line 2
-			if (text_lines >= 2 && text_content_line_2 != "") {
-				translate([0,0,cylinderHeight * (text_lines - 2)]) {
-					text_on_cylinder(t=text_content_line_2,r=total_outer_radius_outer_part(outer_radius, thickness, offset), h=cylinderHeight, font=text_font_line_2, direction="ltr", size=text_size_line_2, extrusion_height=2*thickness*inscription_depth);
+				// Line 2
+				if (text_lines >= 2 && text_content_line_2 != "") {
+					translate([0,0,cylinderHeight * (text_lines - 2)]) {
+						text_on_cylinder(t=text_content_line_2,r=total_outer_radius_outer_part(outer_radius, thickness, offset), h=cylinderHeight, font=text_font_line_2, direction="ltr", size=text_size_line_2, extrusion_height=2*thickness*inscription_depth);
+					}
 				}
-			}
-			// Line 3
-			if (text_lines >= 3 && text_content_line_3 != "") {
-				translate([0,0,cylinderHeight * (text_lines - 3)]) {
-					text_on_cylinder(t=text_content_line_3,r=total_outer_radius_outer_part(outer_radius, thickness, offset), h=cylinderHeight, font=text_font_line_3, direction="ltr", size=text_size_line_3, extrusion_height=2*thickness*inscription_depth);
+				// Line 3
+				if (text_lines >= 3 && text_content_line_3 != "") {
+					translate([0,0,cylinderHeight * (text_lines - 3)]) {
+						text_on_cylinder(t=text_content_line_3,r=total_outer_radius_outer_part(outer_radius, thickness, offset), h=cylinderHeight, font=text_font_line_3, direction="ltr", size=text_size_line_3, extrusion_height=2*thickness*inscription_depth);
+					}
 				}
 			}
 		}
