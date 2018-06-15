@@ -49,8 +49,8 @@ module closing_snap(snapHeight, snapRadius, snapDistance, cutCylinderRadius, rot
 	}
 }
 
-closing_snap(snapHeight=10, snapRadius=2, snapDistance=17, cutCylinderRadius = 14, overlap=1, rotation = 0, outer = false, closing = true);
-//closing_snap(snapHeight=10, snapRadius=2, snapDistance=17, cutCylinderRadius = 20, overlap=1, rotation = 0, outer = true, closing = true);
+closing_snap(snapHeight=10, snapRadius=2, snapDistance=17, cutCylinderRadius = 14, overlap=1, rotation = 0, outer = false, closing = false);
+closing_snap(snapHeight=10, snapRadius=2, snapDistance=17, cutCylinderRadius = 20, overlap=1, rotation = 0, outer = true, closing = false);
 
 // Outer
 difference() {
