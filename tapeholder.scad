@@ -124,7 +124,6 @@ module inner_part(
 		tape_base,
 		wall_thickness,
 		plate_thickness,
-		connector_snap_pillar_thickness,
 		wall_offset,
 		add_closing_snaps=true,
 		closing_snap_height,
@@ -179,7 +178,7 @@ module inner_part(
 //			}
 			// inner hole
 			translate([0, 0, -1]) {
-				cylinder(h = total_height + 2, r = inner_radius - connector_snap_pillar_thickness);
+				cylinder(h = total_height + 2, r = inner_radius - wall_thickness);
 			}
 		}
 		// closing_snap
@@ -674,7 +673,6 @@ module factory() {
 				tape_base,
 				wall_thickness,
 				plate_thickness,
-				connector_snap_pillar_thickness,
 				wall_offset,
 				add_closing_snaps,
 				closing_snap_height,
@@ -723,7 +721,6 @@ module factory() {
 					tape_base,
 					wall_thickness,
 					plate_thickness,
-					connector_snap_pillar_thickness,
 					wall_offset,
 					add_closing_snaps,
 					closing_snap_height,
@@ -787,7 +784,6 @@ module factory() {
 							tape_base,
 							wall_thickness,
 							plate_thickness,
-							connector_snap_pillar_thickness,
 							wall_offset,
 							add_closing_snaps,
 							closing_snap_height,
