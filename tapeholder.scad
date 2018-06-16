@@ -137,7 +137,7 @@ module inner_part(
 	total_height = height + plate_thickness;
 	tape_base = max(tape_base, (wall_thickness + wall_offset));
 	tape_base_angle = tape_base_angle(wall_thickness, total_outer_radius);
-	closing_snap_height = closing_snap_height < 0 ? total_height : closing_snap_height;
+	closing_snap_height = closing_snap_height < 0 ? height : closing_snap_height;
 
 	union() {
 		difference() {
@@ -169,8 +169,8 @@ module inner_part(
 									radius_cuts(total_height, total_outer_radius + tape_base, wall_thickness);
 								}
 							}
-							translate([0,0,-1]) {
-								cylinder(h = total_height + 2, r = total_outer_radius - wall_thickness);
+							translate([0,0,plate_thickness]) {
+								cylinder(h = height + 1, r = total_outer_radius - wall_thickness);
 							}
 						}
 					}
@@ -185,7 +185,9 @@ module inner_part(
 		}
 		// closing_snap
 		if (add_closing_snaps) {
-			closing_snap(closing_snap_height, closing_snap_radius, total_outer_radius + wall_offset/2, outer_radius, 180, closing_snap_overlap, outer=false, closing=true, debug = debug);
+			translate([0,0, plate_thickness]) {
+				closing_snap(closing_snap_height, closing_snap_radius, total_outer_radius + wall_offset/2, outer_radius, 180, closing_snap_overlap, outer=false, closing=true, debug = debug);
+			}
 		}
 	}
 }
@@ -545,22 +547,32 @@ module closing_snap(snapHeight, snapRadius, snapDistance, cutCylinderRadius, rot
 					rotate([0,0,asin(overlap/2)]) {
 						// Outer
 						translate([2 * snapRadius,0,0]) {
-							make_snap(snapHeight, snapRadius, roundTip);
+							make_snap(snapHeight, snapRadius, roundTip, outer);
 						}
 					}
 				} else {
 					// Inner
-					make_snap(snapHeight, snapRadius, roundTip);
+					make_snap(snapHeight, snapRadius, roundTip, outer);
 				}
 			}
 		}
 	}
 	
-	module make_snap(snapHeight, snapRadius, roundTip) {
+	module make_snap(snapHeight, snapRadius, roundTip, outer) {
 		if (roundTip) {
-			cylinder(h = snapHeight - snapRadius, r = snapRadius);
-			translate([0,0, snapHeight-snapRadius]) {
-				sphere(r = snapRadius);
+			if (outer) {
+				cylinder(h = snapHeight - snapRadius, r = snapRadius);
+				translate([0,0, snapHeight - snapRadius]) {
+					sphere(r = snapRadius);
+				}
+			} else {
+				translate([0,0, snapRadius]) {
+					sphere(r = snapRadius);
+					cylinder(h = snapHeight - 2 * snapRadius, r = snapRadius);
+				}
+				translate([0,0, snapHeight - snapRadius]) {
+					sphere(r=snapRadius);
+				}
 			}
 		} else {
 			cylinder(h = snapHeight, r = snapRadius);
