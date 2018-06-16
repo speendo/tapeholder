@@ -25,11 +25,11 @@ default_offset = 0.2; // [0:0.002:20]
 /* [Wall and Plate Features] */
 
 // Wall Thickness (in mm, -1 for default)
-wall_thickness = 1.2; // [0:0.005:50]
-// Offset between inner and outer Side Walls (in mm, -1 for default)
-wall_offset = 0.2; // [0:0.002:20]
+wall_thickness = 1.2; // [-1:0.005:50]
+// Offset between outer Side Walls (in mm, -1 for default)
+wall_offset = 0.5; // [-1:0.002:20]
 // Base and Top Plate Thickness (in mm, -1 for default)
-plate_thickness = 1.2; // [0:0.005:50]
+plate_thickness = 1.2; // [-1:0.005:50]
 
 /* [Opening Features] */
 
@@ -47,11 +47,13 @@ connector_snap_size = 2.5; // [0:0.005:50]
 // Snap Angle (in Deg)
 connector_snap_angle = 140; // [0:0.01:360]
 // Connector Snap Pillar Thickness (in mm, -1 for default)
-connector_snap_pillar_thickness = 2; // [0:0.005:50]
+connector_snap_pillar_thickness = 2; // [-1:0.005:50]
 // Connector Snap Height (in mm, -1 for default)
 connector_snap_thickness = 1.5; // [0:0.005:50]
-// Connector Snap Offset (in mm, -1 for default)
-connector_snap_offset = 1; // [0:0.002:20]
+// Offset between Inner Part and Outer Part Snaps (in mm, -1 for default)
+connector_snap_horizontal_offset = 1; // [-1:0.002:20]
+// Offset between inner Side Walls (in mm, -1 for default)
+connector_snap_vertical_offset = 0.2; // [-1:0.002:20]
 
 /* [Opening and Closing Snaps] */
 
@@ -206,11 +208,14 @@ module outer_part(
 		connector_snap_size,
 		connector_snap_pillar_thickness,
 		connector_snap_thickness,
-		connector_snap_offset,
+		connector_snap_horizontal_offset,
+		connector_snap_vertical_offset,
 		debug=false
 ) {
 	total_outer_radius = total_outer_radius_outer_part(outer_radius, wall_thickness, wall_offset);
 	total_outer_radius_inner = outer_radius + wall_thickness;
+	
+	total_inner_radius = inner_radius - wall_thickness - connector_snap_vertical_offset;
 
 	tape_base_angle = tape_base_angle(wall_thickness, total_outer_radius_inner);
 	
@@ -235,16 +240,16 @@ module outer_part(
 				difference() {
 					// inner part
 					union() {
-						cylinder(h = height + 2 * plate_thickness + connector_snap_offset, r = inner_radius - wall_thickness - wall_offset);
-						translate([0,0,height + 2 * plate_thickness + connector_snap_offset]) {
-							cylinder(h = connector_snap_thickness, r1 = inner_radius + connector_snap_size - wall_thickness, r2= inner_radius - wall_thickness - wall_offset);
+						cylinder(h = height + 2 * plate_thickness + connector_snap_horizontal_offset, r = total_inner_radius);
+						translate([0,0,height + 2 * plate_thickness + connector_snap_horizontal_offset]) {
+							cylinder(h = connector_snap_thickness, r1 = inner_radius + connector_snap_size - wall_thickness, r2= total_inner_radius);
 						}
 					}
 					// cut connector_snaps
 					translate([0, 0, -1]) {
 						union() {
 							for (i = [1 : connector_snap_number]) {
-								pie(total_outer_radius, 360 / connector_snap_number - connector_snap_angle, total_height + plate_thickness + connector_snap_thickness + connector_snap_offset + 2, i * 360 / connector_snap_number);
+								pie(total_outer_radius, 360 / connector_snap_number - connector_snap_angle, total_height + plate_thickness + connector_snap_thickness + connector_snap_horizontal_offset + 2, i * 360 / connector_snap_number);
 							}
 						}
 					}
@@ -263,15 +268,15 @@ module outer_part(
 				// inner hole
 				translate([0, 0, -1]) {
 					union() {
-						cylinder(h = height + 2 * plate_thickness + connector_snap_thickness + connector_snap_offset + 2, r = inner_radius - wall_thickness - connector_snap_pillar_thickness - wall_offset);
+						cylinder(h = height + 2 * plate_thickness + connector_snap_thickness + connector_snap_horizontal_offset + 2, r = total_inner_radius - connector_snap_pillar_thickness);
 						// cut another part of the base
 						for (i = [1 : connector_snap_number]) {
-							pie(inner_radius - wall_thickness - wall_offset, 360 / connector_snap_number - connector_snap_angle, connector_snap_pillar_thickness + 2, i * 360 / connector_snap_number);
+							pie(total_inner_radius, 360 / connector_snap_number - connector_snap_angle, connector_snap_pillar_thickness + 2, i * 360 / connector_snap_number);
 						}
 					}
 				}
 				if (!debug) {
-					round_inner_cuts(total_height + plate_thickness + connector_snap_thickness + connector_snap_offset, inner_radius - wall_thickness - wall_offset - connector_snap_pillar_thickness, connector_snap_pillar_thickness, resolution);
+					round_inner_cuts(total_height + plate_thickness + connector_snap_thickness + connector_snap_horizontal_offset, total_inner_radius - connector_snap_pillar_thickness, connector_snap_pillar_thickness, resolution);
 				}
 			}
 //		}
@@ -307,7 +312,8 @@ module outer_part_with_text (
 		connector_snap_size,
 		connector_snap_pillar_thickness,
 		connector_snap_thickness,
-		connector_snap_offset,
+		connector_snap_horizontal_offset,
+		connector_snap_vertical_offset,
 		debug=false,
 		text_lines,
 		text_content_line_1,
@@ -339,7 +345,8 @@ module outer_part_with_text (
 				connector_snap_size,
 				connector_snap_pillar_thickness,
 				connector_snap_thickness,
-				connector_snap_offset,
+				connector_snap_horizontal_offset,
+				connector_snap_vertical_offset,
 				debug
 		);
 		translate([0,0,plate_thickness]) {
@@ -386,7 +393,8 @@ module outer_part_with_text_gate(
 				connector_snap_size,
 				connector_snap_pillar_thickness,
 				connector_snap_thickness,
-				connector_snap_offset,
+				connector_snap_horizontal_offset,
+				connector_snap_vertical_offset,
 				debug=false,
 				add_inscription=false,
 				text_lines,
@@ -419,7 +427,8 @@ module outer_part_with_text_gate(
 				connector_snap_size,
 				connector_snap_pillar_thickness,
 				connector_snap_thickness,
-				connector_snap_offset,
+				connector_snap_horizontal_offset,
+				connector_snap_vertical_offset,
 				debug,
 				text_lines,
 				text_content_line_1,
@@ -451,7 +460,8 @@ module outer_part_with_text_gate(
 				connector_snap_size,
 				connector_snap_pillar_thickness,
 				connector_snap_thickness,
-				connector_snap_offset,
+				connector_snap_horizontal_offset,
+				connector_snap_vertical_offset,
 				debug
 
 		);
@@ -669,10 +679,12 @@ module factory() {
 	
 	// Offset
 	wall_offset = wall_offset < 0 ? default_offset : wall_offset;
-	connector_snap_offset = connector_snap_offset < 0 ? default_offset : connector_snap_offset;
+	connector_snap_horizontal_offset = connector_snap_horizontal_offset < 0 ? default_offset : connector_snap_horizontal_offset;
+	connector_snap_vertical_offset = connector_snap_vertical_offset < 0 ? default_offset : connector_snap_vertical_offset;
 	
 	// Closing Snaps
 	closing_snap_radius = closing_snap_radius < 0 ? wall_thickness : closing_snap_radius;
+	// Closing snap height is in the modules!
 
 	if (part == 1) {
 		inner_part(
@@ -709,7 +721,8 @@ module factory() {
 				connector_snap_size,
 				connector_snap_pillar_thickness,
 				connector_snap_thickness,
-				connector_snap_offset,
+				connector_snap_horizontal_offset,
+				connector_snap_vertical_offset,
 				debug,
 				add_inscription,
 				text_lines,
@@ -760,7 +773,8 @@ module factory() {
 					connector_snap_size,
 					connector_snap_pillar_thickness,
 					connector_snap_thickness,
-					connector_snap_offset,
+					connector_snap_horizontal_offset,
+					connector_snap_vertical_offset,
 					debug,
 					add_inscription,
 					text_lines,
@@ -829,7 +843,8 @@ module factory() {
 								connector_snap_size,
 								connector_snap_pillar_thickness,
 								connector_snap_thickness,
-								connector_snap_offset,
+								connector_snap_horizontal_offset,
+								connector_snap_vertical_offset,
 								debug,
 								add_inscription,
 								text_lines,
