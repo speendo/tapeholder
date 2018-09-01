@@ -262,7 +262,7 @@ module outer_part(
 			if (add_closing_snaps) {
 				translate([0,0,plate_thickness]) {
 					closing_snap(closing_snap_height, closing_snap_radius, total_outer_radius_inner + wall_offset/2, total_outer_radius, 180 + tape_base_angle(tape_thickness + wall_thickness, total_outer_radius_inner + wall_offset), closing_snap_overlap, outer=true, closing=true, debug = debug);
-					closing_snap(closing_snap_height, closing_snap_radius, total_outer_radius_inner + wall_offset/2, total_outer_radius, 180+outlet_angle, closing_snap_overlap, outer=true, closing=false, debug = debug);
+#					closing_snap(closing_snap_height, closing_snap_radius, total_outer_radius_inner + wall_offset/2, total_outer_radius, 180 + outlet_angle + tape_base_angle(tape_thickness + wall_thickness, total_outer_radius_inner + wall_offset), closing_snap_overlap, outer=true, closing=false, debug = debug);
 				}
 			}
 		}
