@@ -238,6 +238,17 @@ module outer_part(
 						cylinder(h = total_height - plate_thickness + 1, r = total_outer_radius - wall_thickness);
 						// opening
 						pie(total_outer_radius + 1, outlet_angle + tape_base_angle, total_height - plate_thickness + 1);
+						// round pillars
+						if (!debug) {
+							rotate([0,0,outlet_angle + ( 2 * tape_base_angle)]) {
+								half_wall_cut(total_height - plate_thickness, total_outer_radius, wall_thickness);
+							}
+							rotate([0,0,180 - tape_base_angle]) {
+								mirror([1,0,0]) {
+									half_wall_cut(total_height - plate_thickness, total_outer_radius, wall_thickness);
+								}
+							}
+						}
 					}
 				}
 			}
@@ -581,10 +592,9 @@ module closing_snap(snapHeight, snapRadius, snapDistance, cutCylinderRadius, rot
 
 module round_outer_cuts(height, radius, thickness, resolution) {
 	round_outer_cut(radius, thickness, resolution);
-
 	translate([0, 0, height]) {
 		rotate([180,0,0]) {
-		 round_outer_cut(radius, thickness, resolution);
+			round_outer_cut(radius, thickness, resolution);
 		}
 	}
 }
@@ -664,6 +674,24 @@ module round_wall_cut(height, radius, thickness) {
 			}
 			translate([0,0,-1]) {
 				cylinder(h = height + 3, d = thickness);
+			}
+		}
+	}
+}
+
+module half_wall_cut(height, radius, thickness) {
+	translate([-thickness + radius,0,0]) {
+		difference() {
+			translate([(-thickness / 2) - 1,-thickness - 1,0]) {
+				cube([thickness + 2, thickness + 1, height + 1]);
+			}
+			union() {
+				translate([0,0,-1]) {
+					cylinder(h = height - thickness + 1, r = thickness);
+				}
+				translate([0,0,height - thickness]) {
+					sphere(r = thickness);
+				}
 			}
 		}
 	}
