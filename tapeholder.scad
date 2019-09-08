@@ -54,6 +54,8 @@ connector_snap_thickness = 1.5; // [0:0.005:50]
 connector_snap_horizontal_offset = 1; // [-1:0.002:20]
 // Offset between inner Side Walls (in mm, -1 for default)
 connector_snap_vertical_offset = 0.2; // [-1:0.002:20]
+// Overhang angle (in degrees) - depends on your printer's overhang abilities (normally 45 ° or a little less is possible)
+connector_snap_overhang_angle = 45; // [0:0.1:90]
 
 /* [Opening and Closing Snaps] */
 
@@ -215,6 +217,7 @@ module outer_part(
 		connector_snap_thickness,
 		connector_snap_horizontal_offset,
 		connector_snap_vertical_offset,
+		connector_snap_overhang_angle,
 		debug=false
 ) {
 	total_outer_radius = total_outer_radius_outer_part(outer_radius, wall_thickness, wall_offset);
@@ -227,6 +230,10 @@ module outer_part(
 	total_height = height + 2 * plate_thickness;
 
 	closing_snap_height = closing_snap_height < 0 ? height : closing_snap_height;
+	
+	overhang_cylinder_height = overhang_cylinder_height(connector_snap_overhang_angle, connector_snap_size);
+	offset_overhang_reduction = overhang_cylinder_height(connector_snap_overhang_angle, connector_snap_vertical_offset);
+	echo(offset_overhang_reduction);
 	
 	difference() {
 		union() {
@@ -255,16 +262,19 @@ module outer_part(
 			difference() {
 				// inner part
 				union() {
-					cylinder(h = total_height + connector_snap_horizontal_offset, r = total_inner_radius);
-					translate([0,0,total_height + connector_snap_horizontal_offset]) {
-						cylinder(h = connector_snap_thickness, r1 = inner_radius + connector_snap_size - wall_thickness, r2= total_inner_radius);
+					cylinder(h = total_height + connector_snap_horizontal_offset - offset_overhang_reduction, r = total_inner_radius);
+					translate([0,0,total_height + connector_snap_horizontal_offset - offset_overhang_reduction]) {
+						cylinder(h = overhang_cylinder_height, r1 = total_inner_radius, r2 = inner_radius + connector_snap_size - wall_thickness);
+						translate([0,0,overhang_cylinder_height]) {
+							cylinder(h = connector_snap_thickness, r1 = inner_radius + connector_snap_size - wall_thickness, r2= total_inner_radius);
+						}
 					}
 				}
 				// cut connector_snaps
 				translate([0, 0, -1]) {
 					union() {
 						for (i = [1 : connector_snap_number]) {
-							pie(total_outer_radius, 360 / connector_snap_number - connector_snap_angle, total_height + plate_thickness + connector_snap_thickness + connector_snap_horizontal_offset + 2, i * 360 / connector_snap_number);
+							pie(total_outer_radius, 360 / connector_snap_number - connector_snap_angle, total_height + plate_thickness + overhang_cylinder_height - offset_overhang_reduction + connector_snap_thickness + connector_snap_horizontal_offset + 2, i * 360 / connector_snap_number);
 						}
 					}
 				}
@@ -281,7 +291,7 @@ module outer_part(
 			// inner hole
 			translate([0, 0, -1]) {
 				union() {
-					cylinder(h = height + 2 * plate_thickness + connector_snap_thickness + connector_snap_horizontal_offset + 2, r = total_inner_radius - connector_snap_pillar_thickness);
+					cylinder(h = height + 2 * plate_thickness + overhang_cylinder_height - offset_overhang_reduction + connector_snap_thickness + connector_snap_horizontal_offset + 2, r = total_inner_radius - connector_snap_pillar_thickness);
 					// cut another part of the base
 					for (i = [1 : connector_snap_number]) {
 						pie(total_inner_radius, 360 / connector_snap_number - connector_snap_angle, connector_snap_pillar_thickness + 2, i * 360 / connector_snap_number);
@@ -326,6 +336,7 @@ module outer_part_with_text (
 		connector_snap_thickness,
 		connector_snap_horizontal_offset,
 		connector_snap_vertical_offset,
+		connector_snap_overhang_angle,
 		debug=false,
 		text_lines,
 		text_content_line_1,
@@ -359,6 +370,7 @@ module outer_part_with_text (
 				connector_snap_thickness,
 				connector_snap_horizontal_offset,
 				connector_snap_vertical_offset,
+				connector_snap_overhang_angle,
 				debug
 		);
 		translate([0,0,plate_thickness]) {
@@ -407,6 +419,7 @@ module outer_part_with_text_gate(
 				connector_snap_thickness,
 				connector_snap_horizontal_offset,
 				connector_snap_vertical_offset,
+				connector_snap_overhang_angle,
 				debug=false,
 				add_inscription=false,
 				text_lines,
@@ -441,6 +454,7 @@ module outer_part_with_text_gate(
 				connector_snap_thickness,
 				connector_snap_horizontal_offset,
 				connector_snap_vertical_offset,
+				connector_snap_overhang_angle,
 				debug,
 				text_lines,
 				text_content_line_1,
@@ -474,6 +488,7 @@ module outer_part_with_text_gate(
 				connector_snap_thickness,
 				connector_snap_horizontal_offset,
 				connector_snap_vertical_offset,
+				connector_snap_overhang_angle,
 				debug
 
 		);
@@ -484,6 +499,8 @@ module outer_part_with_text_gate(
 function tape_base_angle(thickness, total_outer_radius) = atan(thickness / (total_outer_radius));
 
 function total_outer_radius_outer_part(outer_radius, thickness, offset) = outer_radius + 2 * thickness + offset;
+
+function overhang_cylinder_height(connector_snap_overhang_angle, snap_size) = snap_size / tan(connector_snap_overhang_angle);
 
 // Ressources
 module pie(radius, angle, height, spin=0) {
@@ -609,7 +626,7 @@ module round_outer_cut(radius, thickness, resolution) {
 				square([radius - thickness, 2 * thickness + 3]);
 			}
 			translate([radius - thickness, thickness, 0]) {
-				circle(r=thickness, fn=resolution);
+				circle(r=thickness, $fn=resolution);
 			}
 		}
 	}
@@ -799,6 +816,7 @@ module factory() {
 				connector_snap_thickness,
 				connector_snap_horizontal_offset,
 				connector_snap_vertical_offset,
+				connector_snap_overhang_angle,
 				debug,
 				add_inscription,
 				text_lines,
@@ -851,6 +869,7 @@ module factory() {
 					connector_snap_thickness,
 					connector_snap_horizontal_offset,
 					connector_snap_vertical_offset,
+					connector_snap_overhang_angle,
 					debug,
 					add_inscription,
 					text_lines,
@@ -921,6 +940,7 @@ module factory() {
 								connector_snap_thickness,
 								connector_snap_horizontal_offset,
 								connector_snap_vertical_offset,
+								connector_snap_overhang_angle,
 								debug,
 								add_inscription,
 								text_lines,
