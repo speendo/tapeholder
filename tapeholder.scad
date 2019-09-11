@@ -233,7 +233,6 @@ module outer_part(
 	
 	overhang_cylinder_height = overhang_cylinder_height(connector_snap_overhang_angle, connector_snap_size);
 	offset_overhang_reduction = overhang_cylinder_height(connector_snap_overhang_angle, connector_snap_vertical_offset);
-	echo(offset_overhang_reduction);
 	
 	difference() {
 		union() {
