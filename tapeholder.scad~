@@ -232,7 +232,7 @@ module outer_part(
 
 	closing_snap_height = closing_snap_height < 0 ? height : closing_snap_height;
 	
-	connector_snap_thickness = overhang_cylinder_height(connector_snap_angle, connector_snap_size);
+	connector_snap_thickness = overhang_cylinder_height(connector_snap_angle, connector_snap_size - wall_thickness);
 	
 	overhang_cylinder_height = overhang_cylinder_height(connector_snap_overhang_angle, connector_snap_size);
 	offset_overhang_reduction = overhang_cylinder_height(connector_snap_overhang_angle, connector_snap_vertical_offset);
