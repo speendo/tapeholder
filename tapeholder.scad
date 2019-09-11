@@ -301,7 +301,7 @@ module outer_part(
 				}
 			}
 			if (!debug) {
-				round_inner_cuts(total_height + plate_thickness + connector_snap_thickness + connector_snap_horizontal_offset, total_inner_radius - connector_snap_pillar_thickness, connector_snap_pillar_thickness, resolution);
+				round_inner_cuts(total_height + connector_snap_horizontal_offset - offset_overhang_reduction + overhang_cylinder_height + connector_snap_thickness, total_inner_radius - connector_snap_pillar_thickness, connector_snap_pillar_thickness, resolution);
 			}
 		}
 		if (!debug) {
