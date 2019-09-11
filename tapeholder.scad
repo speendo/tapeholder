@@ -43,20 +43,19 @@ tape_base = 5; // [0:0.01:100]
 // Number of Snaps
 connector_snap_number = 2; // [1:1:36]
 // Clip Size (in mm)
-connector_snap_size = 2.5; // [0:0.005:50]
+connector_snap_size = 1.5; // [0:0.005:50]
 // Snap Angle (in Deg)
 connector_snap_slice_angle = 140; // [0:0.01:360]
 // Connector Snap Pillar Thickness (in mm, -1 for default)
 connector_snap_pillar_thickness = 2; // [-1:0.005:50]
-// Connector Snap Height (in mm, -1 for default)
-//connector_snap_thickness = 10.5; // [0:0.005:50]
-connector_snap_angle = 45; // [0.1:0.1:89.9]
+// Connector Snap Angle (in degrees)
+connector_snap_angle = 60; // [0.1:0.1:90]
 // Offset between Inner Part and Outer Part Snaps (in mm, -1 for default)
-connector_snap_horizontal_offset = 1; // [-1:0.002:20]
+connector_snap_horizontal_offset = 0.2; // [-1:0.002:20]
 // Offset between inner Side Walls (in mm, -1 for default)
 connector_snap_vertical_offset = 0.2; // [-1:0.002:20]
-// Overhang angle (in degrees) - depends on your printer's overhang abilities (normally 45 ° or a little less is possible)
-connector_snap_overhang_angle = 45; // [0:0.1:90]
+// Overhang Angle (in degrees) - depends on your printer's overhang abilities (normally 45 ° or a little less is possible)
+connector_snap_overhang_angle = 40; // [0.1:0.1:90]
 
 /* [Opening and Closing Snaps] */
 
@@ -111,6 +110,23 @@ text_font_line_3 = "Liberation Mono";
 
 // Inscription Depth (as share of Wall thickness)
 inscription_depth = 0.4; // [0:0.01:1]
+
+/* [Key Ring] */
+
+// Add A Ring for Keys
+add_key_ring = false;
+
+// Hole Size (in mm)
+key_ring_hole_size = 1.5; // [0:0.01:20]
+
+// Wall Thickness (in mm)
+key_ring_thickness = 3; // [0:0.01:15]
+
+// Ring length (in mm)
+key_ring_length = 4; // [0:0.01:15]
+
+// Position Angle (in degrees)
+key_ring_angle = 10; // [0:0.1:360]
 
 /* [Advanced Features] */
 
@@ -219,6 +235,11 @@ module outer_part(
 		connector_snap_horizontal_offset,
 		connector_snap_vertical_offset,
 		connector_snap_overhang_angle,
+		add_key_ring,
+		key_ring_hole_size,
+		key_ring_thickness,
+		key_ring_length,
+		key_ring_angle,
 		debug=false
 ) {
 	total_outer_radius = total_outer_radius_outer_part(outer_radius, wall_thickness, wall_offset);
@@ -232,16 +253,25 @@ module outer_part(
 
 	closing_snap_height = closing_snap_height < 0 ? height : closing_snap_height;
 	
-	connector_snap_thickness = overhang_cylinder_height(connector_snap_angle, connector_snap_size);
+	connector_snap_thickness = angled_snap_cylinder_height(connector_snap_angle, connector_snap_size);
 	
-	overhang_cylinder_height = overhang_cylinder_height(connector_snap_overhang_angle, connector_snap_size);
-	offset_overhang_reduction = overhang_cylinder_height(connector_snap_overhang_angle, connector_snap_vertical_offset);
+	angled_snap_cylinder_height = angled_snap_cylinder_height(connector_snap_overhang_angle, connector_snap_size);
+	offset_overhang_reduction = angled_snap_cylinder_height(connector_snap_overhang_angle, connector_snap_vertical_offset);
 	
 	difference() {
 		union() {
 			// outer part
 			difference() {
-				cylinder(h = total_height, r = total_outer_radius);
+				union() {
+					cylinder(h = total_height, r = total_outer_radius);
+					if (add_key_ring) {
+						rotate([0,0,-(tape_base_angle(key_ring_length/2,total_outer_radius) + key_ring_angle)]) {
+							translate([total_outer_radius,0,0]) {
+								key_ring(key_ring_hole_size, key_ring_thickness, key_ring_length, debug);
+							}
+						}
+					}
+				}
 				translate([0,0,plate_thickness]) {
 					union() {
 						cylinder(h = total_height - plate_thickness + 1, r = total_outer_radius - wall_thickness);
@@ -266,8 +296,8 @@ module outer_part(
 				union() {
 					cylinder(h = total_height + connector_snap_horizontal_offset - offset_overhang_reduction, r = total_inner_radius);
 					translate([0,0,total_height + connector_snap_horizontal_offset - offset_overhang_reduction]) {
-						cylinder(h = overhang_cylinder_height, r1 = total_inner_radius, r2 = inner_radius + connector_snap_size - wall_thickness);
-						translate([0,0,overhang_cylinder_height]) {
+						cylinder(h = angled_snap_cylinder_height, r1 = total_inner_radius, r2 = inner_radius + connector_snap_size - wall_thickness);
+						translate([0,0,angled_snap_cylinder_height]) {
 							cylinder(h = connector_snap_thickness, r1 = inner_radius + connector_snap_size - wall_thickness, r2= total_inner_radius);
 						}
 					}
@@ -276,7 +306,7 @@ module outer_part(
 				translate([0, 0, -1]) {
 					union() {
 						for (i = [1 : connector_snap_number]) {
-							pie(total_outer_radius, 360 / connector_snap_number - connector_snap_slice_angle, total_height + plate_thickness + overhang_cylinder_height - offset_overhang_reduction + connector_snap_thickness + connector_snap_horizontal_offset + 2, i * 360 / connector_snap_number);
+							pie(total_outer_radius, 360 / connector_snap_number - connector_snap_slice_angle, total_height + plate_thickness + angled_snap_cylinder_height - offset_overhang_reduction + connector_snap_thickness + connector_snap_horizontal_offset + 2, i * 360 / connector_snap_number);
 						}
 					}
 				}
@@ -293,7 +323,7 @@ module outer_part(
 			// inner hole
 			translate([0, 0, -1]) {
 				union() {
-					cylinder(h = height + 2 * plate_thickness + overhang_cylinder_height - offset_overhang_reduction + connector_snap_thickness + connector_snap_horizontal_offset + 2, r = total_inner_radius - connector_snap_pillar_thickness);
+					cylinder(h = height + 2 * plate_thickness + angled_snap_cylinder_height - offset_overhang_reduction + connector_snap_thickness + connector_snap_horizontal_offset + 2, r = total_inner_radius - connector_snap_pillar_thickness);
 					// cut another part of the base
 					for (i = [1 : connector_snap_number]) {
 						pie(total_inner_radius, 360 / connector_snap_number - connector_snap_slice_angle, connector_snap_pillar_thickness + 2, i * 360 / connector_snap_number);
@@ -301,7 +331,7 @@ module outer_part(
 				}
 			}
 			if (!debug) {
-				round_inner_cuts(total_height + connector_snap_horizontal_offset - offset_overhang_reduction + overhang_cylinder_height + connector_snap_thickness, total_inner_radius - connector_snap_pillar_thickness, connector_snap_pillar_thickness, resolution);
+				round_inner_cuts(total_height + connector_snap_horizontal_offset - offset_overhang_reduction + angled_snap_cylinder_height + connector_snap_thickness, total_inner_radius - connector_snap_pillar_thickness, connector_snap_pillar_thickness, resolution);
 			}
 		}
 		if (!debug) {
@@ -309,6 +339,36 @@ module outer_part(
 			translate([0,0,total_height]) {
 				rotate([180,0,0]) {
 					round_outer_cut(total_outer_radius, wall_thickness, resolution);
+				}
+			}
+		}
+	}
+}
+
+module key_ring (
+		key_ring_hole_size,
+		key_ring_thickness,
+		key_ring_length,
+		debug
+) {
+	translate([0,0,key_ring_hole_size + key_ring_thickness]) {
+		rotate([90,0,0]) {
+			if (debug) {
+				translate([0,0,-key_ring_length/2]) {
+					difference() {
+						// Outer part
+						cylinder(d = 2*(key_ring_hole_size + key_ring_thickness), h = key_ring_length);
+						// Inner Part
+						translate([0,0,-1]) {
+							cylinder(d = 2*key_ring_hole_size, h = key_ring_length + 2);
+						}
+					}
+				}
+			} else {
+				rotate_extrude() {
+					translate([key_ring_hole_size + key_ring_thickness/2,0,0]) {
+						resize([key_ring_thickness, key_ring_length])circle(max(key_ring_length, key_ring_thickness));
+					}
 				}
 			}
 		}
@@ -339,6 +399,11 @@ module outer_part_with_text (
 		connector_snap_horizontal_offset,
 		connector_snap_vertical_offset,
 		connector_snap_overhang_angle,
+		add_key_ring,
+		key_ring_hole_size,
+		key_ring_thickness,
+		key_ring_length,
+		key_ring_angle,
 		debug=false,
 		text_lines,
 		text_content_line_1,
@@ -373,6 +438,11 @@ module outer_part_with_text (
 				connector_snap_horizontal_offset,
 				connector_snap_vertical_offset,
 				connector_snap_overhang_angle,
+				add_key_ring,
+				key_ring_hole_size,
+				key_ring_thickness,
+				key_ring_length,
+				key_ring_angle,
 				debug
 		);
 		translate([0,0,plate_thickness]) {
@@ -422,6 +492,11 @@ module outer_part_with_text_gate(
 				connector_snap_horizontal_offset,
 				connector_snap_vertical_offset,
 				connector_snap_overhang_angle,
+				add_key_ring,
+				key_ring_hole_size,
+				key_ring_thickness,
+				key_ring_length,
+				key_ring_angle,
 				debug=false,
 				add_inscription=false,
 				text_lines,
@@ -457,6 +532,11 @@ module outer_part_with_text_gate(
 				connector_snap_horizontal_offset,
 				connector_snap_vertical_offset,
 				connector_snap_overhang_angle,
+				add_key_ring,
+				key_ring_hole_size,
+				key_ring_thickness,
+				key_ring_length,
+				key_ring_angle,
 				debug,
 				text_lines,
 				text_content_line_1,
@@ -491,6 +571,11 @@ module outer_part_with_text_gate(
 				connector_snap_horizontal_offset,
 				connector_snap_vertical_offset,
 				connector_snap_overhang_angle,
+				add_key_ring,
+				key_ring_hole_size,
+				key_ring_thickness,
+				key_ring_length,
+				key_ring_angle,
 				debug
 
 		);
@@ -502,7 +587,7 @@ function tape_base_angle(thickness, total_outer_radius) = atan(thickness / (tota
 
 function total_outer_radius_outer_part(outer_radius, thickness, offset) = outer_radius + 2 * thickness + offset;
 
-function overhang_cylinder_height(connector_snap_overhang_angle, snap_size) = snap_size / tan(connector_snap_overhang_angle);
+function angled_snap_cylinder_height(connector_snap_overhang_angle, snap_size) = snap_size / tan(connector_snap_overhang_angle);
 
 // Ressources
 module pie(radius, angle, height, spin=0) {
@@ -766,11 +851,10 @@ module radius_cut(radius, thickness) {
 // Factory
 
 module factory() {
-// Thickness
+	// Thickness
 	wall_thickness = wall_thickness < 0 ? default_thickness : wall_thickness;
 	plate_thickness = plate_thickness < 0 ? default_thickness : plate_thickness;
 	connector_snap_pillar_thickness = connector_snap_pillar_thickness < 0 ? default_thickness : connector_snap_pillar_thickness;
-//	connector_snap_thickness = connector_snap_thickness < 0 ? default_thickness : connector_snap_thickness; this is probably a relict of a previous version and can be removed
 	
 	// Offset
 	wall_offset = wall_offset < 0 ? default_offset : wall_offset;
@@ -780,7 +864,7 @@ module factory() {
 	// Closing Snaps
 	closing_snap_radius = closing_snap_radius < 0 ? wall_thickness : closing_snap_radius;
 	// Closing snap height is in the modules!
-
+	
 	if (part == 1) {
 		inner_part(
 				height,
@@ -819,6 +903,11 @@ module factory() {
 				connector_snap_horizontal_offset,
 				connector_snap_vertical_offset,
 				connector_snap_overhang_angle,
+				add_key_ring,
+				key_ring_hole_size,
+				key_ring_thickness,
+				key_ring_length,
+				key_ring_angle,
 				debug,
 				add_inscription,
 				text_lines,
@@ -872,6 +961,11 @@ module factory() {
 					connector_snap_horizontal_offset,
 					connector_snap_vertical_offset,
 					connector_snap_overhang_angle,
+					add_key_ring,
+					key_ring_hole_size,
+					key_ring_thickness,
+					key_ring_length,
+					key_ring_angle,
 					debug,
 					add_inscription,
 					text_lines,
@@ -943,6 +1037,11 @@ module factory() {
 								connector_snap_horizontal_offset,
 								connector_snap_vertical_offset,
 								connector_snap_overhang_angle,
+								add_key_ring,
+								key_ring_hole_size,
+								key_ring_thickness,
+								key_ring_length,
+								key_ring_angle,
 								debug,
 								add_inscription,
 								text_lines,
