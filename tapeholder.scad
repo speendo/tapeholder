@@ -609,7 +609,7 @@ module round_outer_cut(radius, thickness, resolution) {
 				square([radius - thickness, 2 * thickness + 3]);
 			}
 			translate([radius - thickness, thickness, 0]) {
-				circle(r=thickness, fn=resolution);
+				circle(r=thickness, $fn=resolution);
 			}
 		}
 	}
@@ -638,7 +638,7 @@ module round_inner_cut(radius, thickness, resolution) {
 			}
 			rotate_extrude(convexity=convexity, $fn=resolution) {
 				translate([radius + thickness, thickness, 0]) {
-					circle(r=thickness, fn=resolution);
+					circle(r=thickness, $fn=resolution);
 				}
 			}
 		}
