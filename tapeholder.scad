@@ -117,16 +117,16 @@ inscription_depth = 0.4; // [0:0.01:1]
 add_key_ring = false;
 
 // Hole Size (in mm)
-key_ring_hole_size = 1.5; // [0:0.01:20]
+key_ring_hole_size = 2; // [0:0.01:20]
 
 // Wall Thickness (in mm)
 key_ring_thickness = 3; // [0:0.01:15]
 
 // Ring length (in mm)
-key_ring_length = 4; // [0:0.01:15]
+key_ring_length = 5; // [0:0.01:15]
 
 // Position Angle (in degrees)
-key_ring_angle = 10; // [0:0.1:360]
+key_ring_angle = 7.5; // [0:0.1:360]
 
 /* [Advanced Features] */
 
@@ -235,11 +235,6 @@ module outer_part(
 		connector_snap_horizontal_offset,
 		connector_snap_vertical_offset,
 		connector_snap_overhang_angle,
-		add_key_ring,
-		key_ring_hole_size,
-		key_ring_thickness,
-		key_ring_length,
-		key_ring_angle,
 		debug=false
 ) {
 	total_outer_radius = total_outer_radius_outer_part(outer_radius, wall_thickness, wall_offset);
@@ -262,16 +257,7 @@ module outer_part(
 		union() {
 			// outer part
 			difference() {
-				union() {
-					cylinder(h = total_height, r = total_outer_radius);
-					if (add_key_ring) {
-						rotate([0,0,-(tape_base_angle(key_ring_length/2,total_outer_radius) + key_ring_angle)]) {
-							translate([total_outer_radius,0,0]) {
-								key_ring(key_ring_hole_size, key_ring_thickness, key_ring_length, debug);
-							}
-						}
-					}
-				}
+				cylinder(h = total_height, r = total_outer_radius);
 				translate([0,0,plate_thickness]) {
 					union() {
 						cylinder(h = total_height - plate_thickness + 1, r = total_outer_radius - wall_thickness);
@@ -417,7 +403,7 @@ module outer_part_with_text (
 		text_font_line_3
 ) {
 	difference() {
-		outer_part(
+		outer_part_with_key_ring_gate(
 				height,
 				outer_radius,
 				inner_radius,
@@ -470,6 +456,7 @@ module outer_part_with_text (
 		}
 	}
 }
+
 
 module outer_part_with_text_gate(
 				height,
@@ -550,7 +537,7 @@ module outer_part_with_text_gate(
 				text_font_line_3
 		);
 	} else {
-		outer_part(
+		outer_part_with_key_ring_gate(
 				height,
 				outer_radius,
 				inner_radius,
@@ -577,7 +564,158 @@ module outer_part_with_text_gate(
 				key_ring_length,
 				key_ring_angle,
 				debug
+		);
+	}
+}
 
+module outer_part_with_key_ring (
+		height,
+		outer_radius,
+		inner_radius,
+		outlet_angle,
+		tape_thickness,
+		wall_thickness,
+		plate_thickness,
+		wall_offset,
+		add_closing_snaps=true,
+		closing_snap_height,
+		closing_snap_radius,
+		closing_snap_overlap,
+		connector_snap_number,
+		connector_snap_slice_angle,
+		connector_snap_size,
+		connector_snap_pillar_thickness,
+		connector_snap_angle,
+		connector_snap_horizontal_offset,
+		connector_snap_vertical_offset,
+		connector_snap_overhang_angle,
+		add_key_ring,
+		key_ring_hole_size,
+		key_ring_thickness,
+		key_ring_length,
+		key_ring_angle,
+		debug=false
+) {
+
+	total_outer_radius = total_outer_radius_outer_part(outer_radius, wall_thickness, wall_offset);
+
+	union() {
+		outer_part(
+			height,
+			outer_radius,
+			inner_radius,
+			outlet_angle,
+			tape_thickness,
+			wall_thickness,
+			plate_thickness,
+			wall_offset,
+			add_closing_snaps,
+			closing_snap_height,
+			closing_snap_radius,
+			closing_snap_overlap,
+			connector_snap_number,
+			connector_snap_slice_angle,
+			connector_snap_size,
+			connector_snap_pillar_thickness,
+			connector_snap_angle,
+			connector_snap_horizontal_offset,
+			connector_snap_vertical_offset,
+			connector_snap_overhang_angle,
+			debug
+		);
+		difference() {
+			rotate([0,0,-(tape_base_angle(key_ring_length/2,total_outer_radius) + key_ring_angle)]) {
+				translate([total_outer_radius,0,0]) {
+					key_ring(key_ring_hole_size, key_ring_thickness, key_ring_length, debug);
+				}
+			}
+			translate([0,0,plate_thickness]) {
+				cylinder(h = 2 * (key_ring_hole_size + key_ring_thickness) - plate_thickness + 1, r = total_outer_radius - wall_thickness);
+			}
+		}
+	}
+}
+
+module outer_part_with_key_ring_gate(
+				height,
+				outer_radius,
+				inner_radius,
+				outlet_angle,
+				tape_thickness,
+				wall_thickness,
+				plate_thickness,
+				wall_offset,
+				add_closing_snaps=true,
+				closing_snap_height,
+				closing_snap_radius,
+				closing_snap_overlap,
+				connector_snap_number,
+				connector_snap_slice_angle,
+				connector_snap_size,
+				connector_snap_pillar_thickness,
+				connector_snap_angle,
+				connector_snap_horizontal_offset,
+				connector_snap_vertical_offset,
+				connector_snap_overhang_angle,
+				add_key_ring,
+				key_ring_hole_size,
+				key_ring_thickness,
+				key_ring_length,
+				key_ring_angle,
+				debug=false
+) {
+	if (add_key_ring) {
+		outer_part_with_key_ring(
+				height,
+				outer_radius,
+				inner_radius,
+				outlet_angle,
+				tape_thickness,
+				wall_thickness,
+				plate_thickness,
+				wall_offset,
+				add_closing_snaps,
+				closing_snap_height,
+				closing_snap_radius,
+				closing_snap_overlap,
+				connector_snap_number,
+				connector_snap_slice_angle,
+				connector_snap_size,
+				connector_snap_pillar_thickness,
+				connector_snap_angle,
+				connector_snap_horizontal_offset,
+				connector_snap_vertical_offset,
+				connector_snap_overhang_angle,
+				add_key_ring,
+				key_ring_hole_size,
+				key_ring_thickness,
+				key_ring_length,
+				key_ring_angle,
+				debug
+		);
+	} else {
+		outer_part(
+				height,
+				outer_radius,
+				inner_radius,
+				outlet_angle,
+				tape_thickness,
+				wall_thickness,
+				plate_thickness,
+				wall_offset,
+				add_closing_snaps,
+				closing_snap_height,
+				closing_snap_radius,
+				closing_snap_overlap,
+				connector_snap_number,
+				connector_snap_slice_angle,
+				connector_snap_size,
+				connector_snap_pillar_thickness,
+				connector_snap_angle,
+				connector_snap_horizontal_offset,
+				connector_snap_vertical_offset,
+				connector_snap_overhang_angle,
+				debug
 		);
 	}
 }
