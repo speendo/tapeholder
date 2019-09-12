@@ -44,7 +44,7 @@ tape_base = 5; // [0:0.01:100]
 connector_snap_number = 2; // [1:1:36]
 // Clip Size (in mm)
 connector_snap_size = 1.5; // [0:0.005:50]
-// Snap Angle (in Deg)
+// Snap Slice Angle (in degrees, determines the gap size)
 connector_snap_slice_angle = 140; // [0:0.01:360]
 // Connector Snap Pillar Thickness (in mm, -1 for default)
 connector_snap_pillar_thickness = 2; // [-1:0.005:50]
@@ -351,7 +351,7 @@ module key_ring (
 					}
 				}
 			} else {
-				rotate_extrude() {
+				rotate_extrude(convexity=convexity, $fn=resolution) {
 					translate([key_ring_hole_size + key_ring_thickness/2,0,0]) {
 						resize([key_ring_thickness, key_ring_length])circle(max(key_ring_length, key_ring_thickness));
 					}
